@@ -4,7 +4,7 @@ import path from 'path'
 
 export default defineConfig(({ command }) => ({
   root: 'client',
-  base: command === 'build' ? '/vijay_portfolio/' : '/',
+  base: command === 'build' ? '/portfolio2026/' : '/',
   plugins: [react()],
   resolve: {
     alias: {
