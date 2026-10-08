@@ -1,12 +1,15 @@
 import { Skill } from '../types/database.types'
+import { supabase } from '../lib/supabase'
 
 export async function getSkills(): Promise<Skill[]> {
   try {
-    const response = await fetch('/api/skills')
-    if (!response.ok) {
-      throw new Error('Failed to load skills')
-    }
-    return await response.json()
+    const { data, error } = await supabase
+      .from('skills')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return data || []
   } catch (error) {
     console.error('Error fetching skills:', error)
     throw new Error('Failed to load skills')
@@ -15,21 +18,14 @@ export async function getSkills(): Promise<Skill[]> {
 
 export async function createSkill(skill: Omit<Skill, 'id' | 'created_at'>): Promise<Skill> {
   try {
-    const token = localStorage.getItem('portfolio_admin_token')
-    const response = await fetch('/api/skills', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify(skill),
-    })
+    const { data, error } = await supabase
+      .from('skills')
+      .insert(skill)
+      .select()
+      .single()
 
-    if (!response.ok) {
-      throw new Error('Failed to add skill')
-    }
-
-    return await response.json()
+    if (error) throw error
+    return data
   } catch (error) {
     console.error('Error creating skill:', error)
     throw new Error('Failed to add skill')
@@ -38,17 +34,12 @@ export async function createSkill(skill: Omit<Skill, 'id' | 'created_at'>): Prom
 
 export async function deleteSkill(id: number): Promise<void> {
   try {
-    const token = localStorage.getItem('portfolio_admin_token')
-    const response = await fetch(`/api/skills/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    })
+    const { error } = await supabase
+      .from('skills')
+      .delete()
+      .eq('id', id)
 
-    if (!response.ok) {
-      throw new Error('Failed to delete skill')
-    }
+    if (error) throw error
   } catch (error) {
     console.error('Error deleting skill:', error)
     throw new Error('Failed to delete skill')
