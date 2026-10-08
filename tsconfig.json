@@ -19,7 +19,6 @@
     "noImplicitAny": false,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "noResolveJsonModule": false,
     "paths": {
       "@/*": ["./client/src/*"]
     }
