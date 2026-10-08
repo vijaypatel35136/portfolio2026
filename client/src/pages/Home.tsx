@@ -72,10 +72,7 @@ interface Profile {
   experience_years: number
   projects_count: number
   education?: string
-  resume_url?: string
-  resume_file_data?: string
-  resume_file_type?: string
-  resume_file_name?: string
+  resume_pdf?: string
 }
 
 interface Skill {
@@ -124,7 +121,11 @@ const SECTIONS = [
   { id: '07', label: 'contact', href: '#contact' },
 ]
 
-export default function Home() {
+interface HomeProps {
+  darkMode?: boolean
+}
+
+export default function Home({ darkMode = true }: HomeProps) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [skills, setSkills] = useState<Skill[]>([])
   const [experiences, setExperiences] = useState<Experience[]>([])
@@ -261,19 +262,23 @@ export default function Home() {
               <button onClick={() => scrollToSection('#projects')} className="btn-primary px-6 py-3 flex items-center gap-2">
                 View Projects <ArrowRight size={18} />
               </button>
-              {profile?.resume_url || profile?.resume_file_data ? (
+              {profile?.resume_pdf ? (
                 <button
-                  onClick={() => {
-                    if (profile?.resume_url) {
-                      window.open(profile.resume_url, '_blank')
-                    } else if (profile?.resume_file_data) {
+                  onClick={async () => {
+                    try {
+                      const response = await fetch(profile.resume_pdf)
+                      const blob = await response.blob()
+                      const url = window.URL.createObjectURL(blob)
                       const link = document.createElement('a')
-                      link.href = profile.resume_file_data
-                      link.download = profile.resume_file_name || 'resume'
-                      link.target = '_blank'
+                      link.href = url
+                      link.download = 'resume.pdf'
                       document.body.appendChild(link)
                       link.click()
                       document.body.removeChild(link)
+                      window.URL.revokeObjectURL(url)
+                    } catch (error) {
+                      console.error('Download error:', error)
+                      window.open(profile.resume_pdf, '_blank')
                     }
                   }}
                   className="btn-ghost px-6 py-3 flex items-center gap-2"
@@ -548,7 +553,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <ContactForm />
+              <ContactForm darkMode={darkMode} />
             </div>
           </motion.div>
         </div>

@@ -10,7 +10,11 @@ const sections = [
   { id: 'contact', label: '07' },
 ]
 
-export default function ScrollDots() {
+interface ScrollDotsProps {
+  darkMode?: boolean
+}
+
+export default function ScrollDots({ darkMode = true }: ScrollDotsProps) {
   const [activeSection, setActiveSection] = useState('hero')
 
   useEffect(() => {
@@ -58,6 +62,10 @@ export default function ScrollDots() {
           className={`scroll-dot ${
             activeSection === section.id ? 'active' : ''
           }`}
+          style={{
+            '--border-line': darkMode ? '#1c2740' : '#e5e7eb',
+            '--teal-500': darkMode ? '#0e7c7b' : '#0d9488'
+          } as React.CSSProperties}
           aria-label={`Scroll to ${section.id}`}
         />
       ))}

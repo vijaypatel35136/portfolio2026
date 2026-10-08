@@ -2,18 +2,29 @@ import { useState, useEffect } from 'react'
 import AppRoutes from './routes/AppRoutes'
 
 function App() {
-  const [darkMode, setDarkMode] = useState(true)
+  const [darkMode, setDarkMode] = useState(() => {
+    // Check localStorage or system preference
+    const saved = localStorage.getItem('theme')
+    if (saved) return saved === 'dark'
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+  })
 
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark')
+      localStorage.setItem('theme', 'dark')
     } else {
       document.documentElement.classList.remove('dark')
+      localStorage.setItem('theme', 'light')
     }
   }, [darkMode])
 
   return (
-    <div className="min-h-screen bg-navy-900 text-gray-100 dark">
+    <div className={`min-h-screen transition-colors duration-300 ${
+      darkMode
+        ? 'bg-navy-900 text-gray-100'
+        : 'bg-gray-50 text-gray-900'
+    }`}>
       <AppRoutes darkMode={darkMode} setDarkMode={setDarkMode} />
     </div>
   )

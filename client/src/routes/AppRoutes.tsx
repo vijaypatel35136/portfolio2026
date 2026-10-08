@@ -19,8 +19,8 @@ export function AppRoutes({ darkMode, setDarkMode }: AppRoutesProps) {
         element={
           <>
             <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
-            <ScrollDots />
-            <Home />
+            <ScrollDots darkMode={darkMode} />
+            <Home darkMode={darkMode} />
           </>
         }
       />

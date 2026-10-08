@@ -48,7 +48,11 @@ export default function Navbar({ darkMode, setDarkMode }: NavbarProps) {
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      scrolled ? 'bg-navy-900/95 backdrop-blur-sm py-4' : 'bg-transparent py-6'
+      scrolled
+        ? darkMode
+          ? 'bg-navy-900/95 backdrop-blur-sm py-4'
+          : 'bg-white/95 backdrop-blur-sm py-4'
+        : 'bg-transparent py-6'
     }`}>
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
         {/* Logo */}
@@ -70,7 +74,9 @@ export default function Navbar({ darkMode, setDarkMode }: NavbarProps) {
               className={`text-sm transition-colors duration-200 ${
                 activeSection === link.href.substring(1)
                   ? 'text-teal-400 font-medium'
-                  : 'text-gray-400 hover:text-teal-400'
+                  : darkMode
+                    ? 'text-gray-400 hover:text-teal-400'
+                    : 'text-gray-600 hover:text-teal-600'
               }`}
             >
               {link.name}
@@ -91,7 +97,7 @@ export default function Navbar({ darkMode, setDarkMode }: NavbarProps) {
 
         {/* Mobile menu button */}
         <button
-          className="md:hidden p-2 text-gray-400"
+          className={`md:hidden p-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
           {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -100,7 +106,9 @@ export default function Navbar({ darkMode, setDarkMode }: NavbarProps) {
 
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-navy-900 border-t border-navy-700">
+        <div className={`md:hidden absolute top-full left-0 right-0 border-t ${
+          darkMode ? 'bg-navy-900 border-navy-700' : 'bg-white border-gray-200'
+        }`}>
           <div className="flex flex-col p-6 gap-4">
             {navLinks.map((link) => (
               <a
@@ -113,22 +121,26 @@ export default function Navbar({ darkMode, setDarkMode }: NavbarProps) {
                 className={`text-lg transition-colors ${
                   activeSection === link.href.substring(1)
                     ? 'text-teal-400 font-medium'
-                    : 'text-gray-300 hover:text-teal-400'
+                    : darkMode
+                      ? 'text-gray-300 hover:text-teal-400'
+                      : 'text-gray-700 hover:text-teal-600'
                 }`}
               >
                 {link.name}
               </a>
             ))}
-            <div className="flex items-center gap-4 pt-4 border-t border-navy-700">
+            <div className={`flex items-center gap-4 pt-4 border-t ${
+              darkMode ? 'border-navy-700' : 'border-gray-200'
+            }`}>
               <button
                 onClick={() => setDarkMode(!darkMode)}
-                className="p-2 text-gray-400 hover:text-teal-400"
+                className={`p-2 ${darkMode ? 'text-gray-400 hover:text-teal-400' : 'text-gray-600 hover:text-teal-600'}`}
               >
                 {darkMode ? <Sun size={20} /> : <Moon size={20} />}
               </button>
               <Link
                 to="/vijay_dev"
-                className="mono text-sm text-gray-500 hover:text-teal-400"
+                className={`mono text-sm ${darkMode ? 'text-gray-500 hover:text-teal-400' : 'text-gray-600 hover:text-teal-600'}`}
               >
                 /vijay_dev
               </Link>

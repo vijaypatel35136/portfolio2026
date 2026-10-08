@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { FileText, Upload, Trash2, Check, Loader } from 'lucide-react'
+import { FileText, Upload, Trash2, Check, Loader, Download } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { getResumes, uploadResumeFile, setActiveResume, deleteResumeFile, Resume } from '../../services/resumeService'
 
@@ -172,6 +172,15 @@ export default function ResumeManager({ onUpdate, onToast }: ResumeManagerProps)
                   className="px-3 py-1.5 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
                 >
                   View
+                </a>
+                <a
+                  href={resume.public_url}
+                  download={resume.original_name}
+                  className="px-3 py-1.5 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors flex items-center gap-1"
+                  title="Download resume"
+                >
+                  <Download size={14} />
+                  Download
                 </a>
                 {!resume.is_active && (
                   <button

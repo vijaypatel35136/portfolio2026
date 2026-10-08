@@ -3,7 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Send, CheckCircle, XCircle } from 'lucide-react'
 import { submitContactMessage } from '../services/contactService'
 
-export default function ContactForm() {
+interface ContactFormProps {
+  darkMode?: boolean
+}
+
+export default function ContactForm({ darkMode = true }: ContactFormProps) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -49,7 +53,11 @@ export default function ContactForm() {
       initial={{ opacity: 0, x: 20 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
-      className="stats-card p-6 rounded-xl relative"
+      className={`p-6 rounded-xl relative ${
+        darkMode
+          ? 'stats-card'
+          : 'bg-white border border-gray-200 shadow-sm'
+      }`}
       onSubmit={handleSubmit}
     >
       <AnimatePresence>
@@ -59,12 +67,22 @@ export default function ContactForm() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="mb-4 p-4 bg-teal-500/20 border border-teal-500 rounded-lg flex items-start gap-3"
+            className={`mb-4 p-4 border rounded-lg flex items-start gap-3 ${
+              darkMode
+                ? 'bg-teal-500/20 border-teal-500'
+                : 'bg-green-50 border-green-500'
+            }`}
           >
-            <CheckCircle className="w-5 h-5 text-teal-400 flex-shrink-0 mt-0.5" />
+            <CheckCircle className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
+              darkMode ? 'text-teal-400' : 'text-green-600'
+            }`} />
             <div>
-              <p className="text-teal-400 font-semibold">Message sent successfully!</p>
-              <p className="text-teal-300 text-sm mt-1">
+              <p className={`font-semibold ${
+                darkMode ? 'text-teal-400' : 'text-green-700'
+              }`}>Message sent successfully!</p>
+              <p className={`text-sm mt-1 ${
+                darkMode ? 'text-teal-300' : 'text-green-600'
+              }`}>
                 Thanks for reaching out. I'll get back to you within 24 hours.
               </p>
             </div>
@@ -77,12 +95,22 @@ export default function ContactForm() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="mb-4 p-4 bg-red-500/20 border border-red-500 rounded-lg flex items-start gap-3"
+            className={`mb-4 p-4 border rounded-lg flex items-start gap-3 ${
+              darkMode
+                ? 'bg-red-500/20 border-red-500'
+                : 'bg-red-50 border-red-500'
+            }`}
           >
-            <XCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+            <XCircle className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
+              darkMode ? 'text-red-400' : 'text-red-600'
+            }`} />
             <div>
-              <p className="text-red-400 font-semibold">Failed to send message</p>
-              <p className="text-red-300 text-sm mt-1">{errorMessage}</p>
+              <p className={`font-semibold ${
+                darkMode ? 'text-red-400' : 'text-red-700'
+              }`}>Failed to send message</p>
+              <p className={`text-sm mt-1 ${
+                darkMode ? 'text-red-300' : 'text-red-600'
+              }`}>{errorMessage}</p>
             </div>
           </motion.div>
         )}
@@ -90,40 +118,52 @@ export default function ContactForm() {
 
       <div className="space-y-5">
         <div>
-          <label className="block text-sm text-gray-400 mb-2">NAME</label>
+          <label className={`block text-sm mb-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>NAME</label>
           <input
             type="text"
             name="name"
             value={formData.name}
             onChange={handleChange}
             placeholder="Your name"
-            className="w-full px-4 py-3 bg-navy-700 border border-navy-600 rounded-lg text-gray-100 placeholder-gray-500 focus:border-teal-500 transition-colors"
+            className={`w-full px-4 py-3 border rounded-lg focus:border-teal-500 transition-colors ${
+              darkMode
+                ? 'bg-navy-700 border-navy-600 text-gray-100 placeholder-gray-500'
+                : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+            }`}
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm text-gray-400 mb-2">EMAIL</label>
+          <label className={`block text-sm mb-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>EMAIL</label>
           <input
             type="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
             placeholder="your@email.com"
-            className="w-full px-4 py-3 bg-navy-700 border border-navy-600 rounded-lg text-gray-100 placeholder-gray-500 focus:border-teal-500 transition-colors"
+            className={`w-full px-4 py-3 border rounded-lg focus:border-teal-500 transition-colors ${
+              darkMode
+                ? 'bg-navy-700 border-navy-600 text-gray-100 placeholder-gray-500'
+                : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+            }`}
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm text-gray-400 mb-2">MESSAGE</label>
+          <label className={`block text-sm mb-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>MESSAGE</label>
           <textarea
             name="message"
             value={formData.message}
             onChange={handleChange}
             rows={5}
             placeholder="Tell me about your project..."
-            className="w-full px-4 py-3 bg-navy-700 border border-navy-600 rounded-lg text-gray-100 placeholder-gray-500 focus:border-teal-500 transition-colors resize-none"
+            className={`w-full px-4 py-3 border rounded-lg focus:border-teal-500 transition-colors resize-none ${
+              darkMode
+                ? 'bg-navy-700 border-navy-600 text-gray-100 placeholder-gray-500'
+                : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
+            }`}
             required
           />
         </div>
@@ -131,7 +171,11 @@ export default function ContactForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 px-6 bg-teal-600 hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors"
+          className={`w-full py-3 px-6 font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+            darkMode
+              ? 'bg-teal-600 hover:bg-teal-700 text-white'
+              : 'bg-teal-500 hover:bg-teal-600 text-white'
+          }`}
         >
           {loading ? (
             <>

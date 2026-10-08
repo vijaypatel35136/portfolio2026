@@ -11,11 +11,15 @@ import {
   LogOut, 
   Eye,
   FileText,
-  Database
+  Database,
+  Menu,
+  X
 } from 'lucide-react'
 import { isAdminAuthenticated, logoutAdmin } from '../services/authService'
 import { getProjects } from '../services/projectService'
 import { getContactMessages } from '../services/contactService'
+import { getExperiences } from '../services/experienceService'
+import { getSkills } from '../services/skillService'
 import ProfileManager from '../components/admin/ProfileManager'
 import SkillsManager from '../components/admin/SkillsManager'
 import ExperienceManager from '../components/admin/ExperienceManager'
@@ -31,6 +35,7 @@ interface DashboardStats {
   totalMessages: number
   unreadMessages: number
   totalExperience: number
+  totalSkills: number
 }
 
 export default function AdminDashboard() {
@@ -39,7 +44,8 @@ export default function AdminDashboard() {
     totalProjects: 0,
     totalMessages: 0,
     unreadMessages: 0,
-    totalExperience: 0
+    totalExperience: 0,
+    totalSkills: 0
   })
   const [activeTab, setActiveTab] = useState('dashboard')
   const [toasts, setToasts] = useState<Array<{ id: string; message: string; type: 'success' | 'error' }>>([])
@@ -63,15 +69,18 @@ export default function AdminDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      const [projects, messages] = await Promise.all([
+      const [projects, messages, experiences, skills] = await Promise.all([
         getProjects().catch(() => []),
         getContactMessages().catch(() => []),
+        getExperiences().catch(() => []),
+        getSkills().catch(() => [])
       ])
       setStats({
         totalProjects: projects.length,
         totalMessages: messages.length,
         unreadMessages: messages.filter(m => !m.is_read).length,
-        totalExperience: 0
+        totalExperience: experiences.length,
+        totalSkills: skills.length
       })
     } catch {
       // Fallback
@@ -176,19 +185,26 @@ export default function AdminDashboard() {
             <>
               {/* Stats Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                <div
+                  onClick={() => setActiveTab('projects')}
+                  className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm cursor-pointer hover:border-teal-400 hover:shadow-md transition-all duration-200 group"
+                >
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center">
+                    <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center group-hover:bg-teal-200 transition-colors">
                       <FolderOpen className="w-6 h-6 text-teal-600" />
                     </div>
+                    <span className="text-xs text-teal-600 opacity-0 group-hover:opacity-100 transition-opacity">View →</span>
                   </div>
                   <p className="text-3xl font-bold text-navy-800">{stats.totalProjects}</p>
                   <p className="text-gray-500">Total Projects</p>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                <div
+                  onClick={() => setActiveTab('messages')}
+                  className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm cursor-pointer hover:border-blue-400 hover:shadow-md transition-all duration-200 group"
+                >
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
                       <MessageSquare className="w-6 h-6 text-blue-600" />
                     </div>
                     {stats.unreadMessages > 0 && (
@@ -201,24 +217,32 @@ export default function AdminDashboard() {
                   <p className="text-gray-500">Total Messages</p>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                <div
+                  onClick={() => setActiveTab('experience')}
+                  className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm cursor-pointer hover:border-green-400 hover:shadow-md transition-all duration-200 group"
+                >
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
                       <Briefcase className="w-6 h-6 text-green-600" />
                     </div>
+                    <span className="text-xs text-green-600 opacity-0 group-hover:opacity-100 transition-opacity">View →</span>
                   </div>
                   <p className="text-3xl font-bold text-navy-800">{stats.totalExperience}</p>
                   <p className="text-gray-500">Experience Entries</p>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                <div
+                  onClick={() => setActiveTab('skills')}
+                  className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm cursor-pointer hover:border-purple-400 hover:shadow-md transition-all duration-200 group"
+                >
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <Eye className="w-6 h-6 text-purple-600" />
+                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                      <Code className="w-6 h-6 text-purple-600" />
                     </div>
+                    <span className="text-xs text-purple-600 opacity-0 group-hover:opacity-100 transition-opacity">View →</span>
                   </div>
-                  <p className="text-3xl font-bold text-navy-800">-</p>
-                  <p className="text-gray-500">Site Views</p>
+                  <p className="text-3xl font-bold text-navy-800">{stats.totalSkills}</p>
+                  <p className="text-gray-500">Skills Listed</p>
                 </div>
               </div>
 
