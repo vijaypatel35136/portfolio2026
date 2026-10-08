@@ -1,16 +1,7 @@
 import { useState, useEffect } from 'react'
 import { FileText, Upload, Trash2, Check, Loader } from 'lucide-react'
 import { motion } from 'framer-motion'
-
-interface Resume {
-  id: number
-  filename: string
-  original_name: string
-  public_url: string
-  file_size: number
-  is_active: boolean
-  uploaded_at: string
-}
+import { getResumes, uploadResumeFile, setActiveResume, deleteResumeFile, Resume } from '../../services/resumeService'
 
 interface ResumeManagerProps {
   onUpdate: () => void
@@ -28,16 +19,8 @@ export default function ResumeManager({ onUpdate, onToast }: ResumeManagerProps)
 
   async function fetchResumes() {
     try {
-      const token = localStorage.getItem('portfolio_admin_token')
-      const response = await fetch('/api/resumes', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-      if (response.ok) {
-        const data = await response.json()
-        setResumes(data)
-      }
+      const data = await getResumes()
+      setResumes(data)
     } catch (err) {
       console.error('Error fetching resumes:', err)
     } finally {
@@ -61,22 +44,7 @@ export default function ResumeManager({ onUpdate, onToast }: ResumeManagerProps)
 
     setUploading(true)
     try {
-      const token = localStorage.getItem('portfolio_admin_token')
-      const formData = new FormData()
-      formData.append('resume', file)
-
-      const response = await fetch('/api/resumes/upload', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to upload resume')
-      }
-
+      await uploadResumeFile(file)
       onToast?.('Resume uploaded successfully!', 'success')
       await fetchResumes()
       onUpdate()
@@ -90,18 +58,7 @@ export default function ResumeManager({ onUpdate, onToast }: ResumeManagerProps)
 
   const handleSetActive = async (resumeId: number) => {
     try {
-      const token = localStorage.getItem('portfolio_admin_token')
-      const response = await fetch(`/api/resumes/${resumeId}/activate`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to set active resume')
-      }
-
+      await setActiveResume(resumeId)
       onToast?.('Active resume updated!', 'success')
       await fetchResumes()
       onUpdate()
@@ -114,18 +71,7 @@ export default function ResumeManager({ onUpdate, onToast }: ResumeManagerProps)
     if (!confirm('Are you sure you want to delete this resume?')) return
 
     try {
-      const token = localStorage.getItem('portfolio_admin_token')
-      const response = await fetch(`/api/resumes/${resumeId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to delete resume')
-      }
-
+      await deleteResumeFile(resumeId)
       onToast?.('Resume deleted successfully!', 'success')
       await fetchResumes()
       onUpdate()

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Save, Loader, Upload, Trash2, Check, FileText } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { getProfile, updateProfile } from '../../services/profileService'
+import { getResumes, uploadResumeFile, setActiveResume, deleteResumeFile, Resume } from '../../services/resumeService'
 
 interface ProfileForm {
   name: string
@@ -16,15 +17,6 @@ interface ProfileForm {
   projects_count: number
 }
 
-interface Resume {
-  id: number
-  filename: string
-  original_name: string
-  public_url: string
-  file_size: number
-  is_active: boolean
-  uploaded_at: string
-}
 
 interface ProfileManagerProps {
   onUpdate: () => void
@@ -69,16 +61,8 @@ export default function ProfileManager({ onUpdate, onToast }: ProfileManagerProp
 
   async function fetchResumes() {
     try {
-      const token = localStorage.getItem('portfolio_admin_token')
-      const response = await fetch('/api/resumes', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-      if (response.ok) {
-        const data = await response.json()
-        setResumes(data)
-      }
+      const data = await getResumes()
+      setResumes(data)
     } catch (err) {
       console.error('Error fetching resumes:', err)
     }
@@ -134,22 +118,7 @@ export default function ProfileManager({ onUpdate, onToast }: ProfileManagerProp
 
     setUploading(true)
     try {
-      const token = localStorage.getItem('portfolio_admin_token')
-      const formData = new FormData()
-      formData.append('resume', file)
-
-      const response = await fetch('/api/resumes/upload', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to upload resume')
-      }
-
+      await uploadResumeFile(file)
       onToast?.('Resume uploaded successfully!', 'success')
       await fetchResumes()
       e.target.value = '' // Reset file input
@@ -162,18 +131,7 @@ export default function ProfileManager({ onUpdate, onToast }: ProfileManagerProp
 
   const handleSetActive = async (resumeId: number) => {
     try {
-      const token = localStorage.getItem('portfolio_admin_token')
-      const response = await fetch(`/api/resumes/${resumeId}/activate`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to set active resume')
-      }
-
+      await setActiveResume(resumeId)
       onToast?.('Active resume updated!', 'success')
       await fetchResumes()
       await fetchProfile()
@@ -187,17 +145,7 @@ export default function ProfileManager({ onUpdate, onToast }: ProfileManagerProp
     if (!confirm('Are you sure you want to delete this resume?')) return
 
     try {
-      const token = localStorage.getItem('portfolio_admin_token')
-      const response = await fetch(`/api/resumes/${resumeId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to delete resume')
-      }
+      await deleteResumeFile(resumeId)
 
       onToast?.('Resume deleted successfully!', 'success')
       await fetchResumes()
@@ -399,93 +347,6 @@ export default function ProfileManager({ onUpdate, onToast }: ProfileManagerProp
           </button>
         </div>
       </form>
-
-      {/* Resume Management Section */}
-      <div className="mt-8 pt-8 border-t border-gray-200">
-        <h3 className="font-heading text-xl font-bold text-navy-800 mb-4">Resume Files</h3>
-        
-        <div className="mb-4">
-          <label className="flex items-center gap-2 px-4 py-3 bg-teal-50 text-teal-700 rounded-lg hover:bg-teal-100 transition-colors cursor-pointer w-fit">
-            {uploading ? (
-              <>
-                <Loader className="animate-spin" size={18} />
-                Uploading...
-              </>
-            ) : (
-              <>
-                <Upload size={18} />
-                Upload New Resume (PDF, max 10MB)
-              </>
-            )}
-            <input
-              type="file"
-              accept="application/pdf"
-              onChange={handleResumeUpload}
-              disabled={uploading}
-              className="hidden"
-            />
-          </label>
-        </div>
-
-        {resumes.length === 0 ? (
-          <p className="text-gray-500 text-sm">No resumes uploaded yet</p>
-        ) : (
-          <div className="space-y-3">
-            {resumes.map((resume) => (
-              <div
-                key={resume.id}
-                className={`flex items-center justify-between p-4 rounded-lg border-2 ${
-                  resume.is_active
-                    ? 'border-teal-500 bg-teal-50'
-                    : 'border-gray-200 bg-gray-50'
-                }`}
-              >
-                <div className="flex items-center gap-3 flex-1">
-                  <FileText className="text-teal-600" size={24} />
-                  <div className="flex-1">
-                    <p className="font-semibold text-navy-800 flex items-center gap-2">
-                      {resume.original_name}
-                      {resume.is_active && (
-                        <span className="text-xs bg-teal-600 text-white px-2 py-0.5 rounded">
-                          Active
-                        </span>
-                      )}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {(resume.file_size / 1024).toFixed(0)} KB • Uploaded {new Date(resume.uploaded_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <a
-                    href={resume.public_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-3 py-1.5 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
-                  >
-                    View
-                  </a>
-                  {!resume.is_active && (
-                    <button
-                      onClick={() => handleSetActive(resume.id)}
-                      className="px-3 py-1.5 text-sm bg-teal-100 text-teal-700 rounded hover:bg-teal-200 transition-colors flex items-center gap-1"
-                    >
-                      <Check size={14} />
-                      Set Active
-                    </button>
-                  )}
-                  <button
-                    onClick={() => handleDeleteResume(resume.id)}
-                    className="px-3 py-1.5 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
     </motion.div>
   )
 }

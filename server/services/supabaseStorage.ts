@@ -1,13 +1,27 @@
 import { createClient } from '@supabase/supabase-js'
 import dotenv from 'dotenv'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
-dotenv.config()
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+dotenv.config({ path: path.join(__dirname, '../../.env') })
 
 // Initialize Supabase client
 const supabaseUrl = process.env.VITE_SUPABASE_URL || ''
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY || ''
 
-const supabase = createClient(supabaseUrl, supabaseKey)
+let supabase: any = null
+if (supabaseUrl && supabaseKey) {
+  try {
+    supabase = createClient(supabaseUrl, supabaseKey)
+  } catch (err) {
+    console.error('⚠️ Failed to initialize Supabase client:', err)
+  }
+} else {
+  console.warn('⚠️ Supabase credentials missing. VITE_SUPABASE_URL or keys are not set in .env')
+}
 
 const BUCKET_NAME = 'portfolio-files'
 
@@ -16,6 +30,10 @@ const BUCKET_NAME = 'portfolio-files'
  */
 export async function initializeBucket() {
   try {
+    if (!supabase) {
+      console.warn('⚠️ Cannot initialize bucket: Supabase client is not configured.')
+      return
+    }
     const { data: buckets } = await supabase.storage.listBuckets()
     const bucketExists = buckets?.some(bucket => bucket.name === BUCKET_NAME)
     

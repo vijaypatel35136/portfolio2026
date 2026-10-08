@@ -87,12 +87,6 @@ export default function Navbar({ darkMode, setDarkMode }: NavbarProps) {
           >
             {darkMode ? <Sun size={20} /> : <Moon size={20} />}
           </button>
-          <Link 
-            to="/admin"
-            className="mono text-xs text-gray-500 hover:text-teal-400 transition-colors border border-navy-700 px-3 py-1.5 rounded"
-          >
-            /admin
-          </Link>
         </div>
 
         {/* Mobile menu button */}
@@ -132,11 +126,11 @@ export default function Navbar({ darkMode, setDarkMode }: NavbarProps) {
               >
                 {darkMode ? <Sun size={20} /> : <Moon size={20} />}
               </button>
-              <Link 
-                to="/admin"
+              <Link
+                to="/vijay_dev"
                 className="mono text-sm text-gray-500 hover:text-teal-400"
               >
-                /admin
+                /vijay_dev
               </Link>
             </div>
           </div>

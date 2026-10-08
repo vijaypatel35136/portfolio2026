@@ -19,7 +19,7 @@ export default function AdminLogin() {
     try {
       const success = await loginAdmin(email, password)
       if (success) {
-        navigate('/admin/dashboard')
+        navigate('/vijay_dev/dashboard')
       } else {
         setError('Invalid credentials. Check your email and password.')
         setLoading(false)
@@ -127,10 +127,6 @@ export default function AdminLogin() {
             </motion.button>
           </div>
         </motion.form>
-
-        <p className="text-center text-gray-600 text-sm mt-6">
-          Default: admin@vijay.dev / admin123
-        </p>
       </motion.div>
     </div>
   )

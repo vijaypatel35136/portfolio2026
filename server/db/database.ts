@@ -1,8 +1,13 @@
 import { Pool } from 'pg'
 import bcrypt from 'bcryptjs'
 import dotenv from 'dotenv'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
-dotenv.config()
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+dotenv.config({ path: path.join(__dirname, '../../.env') })
 
 // Create PostgreSQL connection pool for Supabase
 const pool = new Pool({
@@ -144,6 +149,20 @@ export async function initDatabase() {
         key TEXT PRIMARY KEY,
         value TEXT,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `)
+
+    // Create resumes table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS resumes (
+        id SERIAL PRIMARY KEY,
+        filename TEXT NOT NULL,
+        original_name TEXT NOT NULL,
+        file_path TEXT NOT NULL,
+        public_url TEXT NOT NULL,
+        file_size INTEGER DEFAULT 0,
+        is_active BOOLEAN DEFAULT false,
+        uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `)
 
@@ -323,6 +342,11 @@ export async function initDatabase() {
     } else {
       console.log(`ℹ️  Education already exists (${eduCount} entries)`)
     }
+
+    // Check resumes status
+    const resumesResult = await client.query("SELECT COUNT(*) as count FROM resumes")
+    const resumesCount = parseInt(resumesResult.rows[0].count)
+    console.log(`ℹ️  Resumes table active (${resumesCount} resume records)`)
 
     console.log('✅ Database initialized successfully')
   } catch (error) {

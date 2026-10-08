@@ -55,7 +55,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (!isAdminAuthenticated()) {
-      navigate('/admin')
+      navigate('/vijay_dev')
       return
     }
     fetchDashboardData()
@@ -80,7 +80,7 @@ export default function AdminDashboard() {
 
   const handleLogout = () => {
     logoutAdmin()
-    navigate('/admin')
+    navigate('/vijay_dev')
   }
 
   const sidebarItems = [

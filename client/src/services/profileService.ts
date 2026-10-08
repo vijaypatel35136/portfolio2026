@@ -21,9 +21,19 @@ export async function getProfile(): Promise<Profile | null> {
 
 export async function updateProfile(profileData: Partial<Profile>): Promise<Profile> {
   try {
+    // First, get the existing profile to obtain its ID
+    const { data: existingProfile, error: fetchError } = await supabase
+      .from('profile')
+      .select('id')
+      .single()
+
+    if (fetchError) throw fetchError
+
+    // Then update using the ID
     const { data, error } = await supabase
       .from('profile')
       .update(profileData)
+      .eq('id', existingProfile.id)
       .select()
       .single()
 
