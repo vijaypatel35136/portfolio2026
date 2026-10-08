@@ -1,0 +1,109 @@
+{
+  "version": "1.0",
+  "last_updated": "2024-01-01T00:00:00.000Z",
+  "profile": {
+    "name": "Vijay Bhesaniya",
+    "title": "Shopify Liquid & Python Developer",
+    "tagline": "Building digital experiences",
+    "tagline_roles": [
+      "Shopify Liquid Developer",
+      "Python Developer",
+      "WordPress Developer",
+      "eCommerce Performance Specialist"
+    ],
+    "summary": "Results-driven Shopify Liquid, Python, and WordPress developer with 2+ years of experience building high-converting eCommerce storefronts, internal business systems, and content-managed websites.",
+    "email": "bhesaniyav38@gmail.com",
+    "phone": "+91 95104 26764",
+    "linkedin": "https://linkedin.com/in/bhesaniya-vijay-355b7020b",
+    "github": "https://vijaybhesaniya.github.io/portfolio/",
+    "location": "Ahmedabad, India",
+    "avatar_url": "",
+    "experience_years": 2,
+    "projects_count": 15,
+    "resume_url": "",
+    "resume_file_data": "",
+    "resume_file_type": "",
+    "resume_file_name": ""
+  },
+  "skills": [
+    { "id": 1, "category": "Shopify & eCommerce", "skill": "Shopify Liquid" },
+    { "id": 2, "category": "Shopify & eCommerce", "skill": "Shopify CLI" },
+    { "id": 3, "category": "Shopify & eCommerce", "skill": "Dawn Theme" },
+    { "id": 4, "category": "Shopify & eCommerce", "skill": "Shopify APIs" },
+    { "id": 5, "category": "Python Development", "skill": "Python" },
+    { "id": 6, "category": "Python Development", "skill": "Flask" },
+    { "id": 7, "category": "Python Development", "skill": "Django" },
+    { "id": 8, "category": "Python Development", "skill": "Automation Scripts" },
+    { "id": 9, "category": "Frontend", "skill": "React" },
+    { "id": 10, "category": "Frontend", "skill": "TypeScript" },
+    { "id": 11, "category": "Frontend", "skill": "Tailwind CSS" },
+    { "id": 12, "category": "WordPress", "skill": "WordPress" },
+    { "id": 13, "category": "WordPress", "skill": "Elementor" },
+    { "id": 14, "category": "WordPress", "skill": "WooCommerce" }
+  ],
+  "experiences": [
+    {
+      "id": 1,
+      "title": "Shopify Liquid Developer",
+      "company": "Freelance / Self-Employed",
+      "location": "Ahmedabad, India",
+      "start_date": "2022",
+      "end_date": null,
+      "is_current": true,
+      "description": [
+        "Built and customised Shopify storefronts using Liquid, Dawn theme, and Shopify CLI.",
+        "Integrated third-party apps and Shopify APIs to extend store functionality.",
+        "Developed Python scripts to automate inventory management and reporting.",
+        "Delivered 15+ projects across various eCommerce niches."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "id": 1,
+      "name": "Shopify Custom Storefront",
+      "description": "Fully custom Shopify store built with Liquid templating and Dawn theme overrides.",
+      "category": "Shopify",
+      "image_url": "",
+      "github_url": "",
+      "url": "https://vijaypatel35136.github.io/vijay_portfolio/",
+      "tech_stack": ["Shopify Liquid", "Dawn Theme", "CSS", "JavaScript"],
+      "is_featured": true
+    },
+    {
+      "id": 2,
+      "name": "Python Inventory Automation",
+      "description": "Python script to sync inventory between Shopify and a local database automatically.",
+      "category": "Python",
+      "image_url": "",
+      "github_url": "https://github.com/vijaypatel35136/vijay_portfolio",
+      "url": "https://github.com/vijaypatel35136/vijay_portfolio",
+      "tech_stack": ["Python", "Shopify API", "SQLite"],
+      "is_featured": false
+    },
+    {
+      "id": 3,
+      "name": "WordPress Business Site",
+      "description": "Responsive business website built on WordPress with custom Elementor layouts.",
+      "category": "WordPress",
+      "image_url": "",
+      "github_url": "",
+      "url": "https://vijaypatel35136.github.io/vijay_portfolio/",
+      "tech_stack": ["WordPress", "Elementor", "WooCommerce"],
+      "is_featured": false
+    }
+  ],
+  "education": [
+    {
+      "id": 1,
+      "degree": "B.E. Computer Engineering",
+      "institution": "Gujarat Technological University",
+      "location": "Ahmedabad, Gujarat",
+      "start_date": "2019",
+      "end_date": "2023",
+      "gpa": null,
+      "description": ""
+    }
+  ],
+  "messages": []
+}
