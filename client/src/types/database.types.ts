@@ -13,6 +13,7 @@ export interface Profile {
   profile_photo?: string
   resume_pdf?: string
   experience_years: number
+  experience_months: number
   projects_count: number
   education?: string
   updated_at?: string

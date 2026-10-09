@@ -14,6 +14,7 @@ interface ProfileForm {
   github: string
   location: string
   experience_years: number
+  experience_months: number
   projects_count: number
 }
 
@@ -49,6 +50,7 @@ export default function ProfileManager({ onUpdate, onToast }: ProfileManagerProp
           github: data.github || '',
           location: data.location || '',
           experience_years: data.experience_years || 0,
+          experience_months: data.experience_months || 0,
           projects_count: data.projects_count || 0,
         })
       }
@@ -304,7 +306,7 @@ export default function ProfileManager({ onUpdate, onToast }: ProfileManagerProp
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-3 gap-6">
           <div>
             <label className="block text-sm font-semibold text-navy-800 mb-2">Years of Experience</label>
             <input
@@ -312,6 +314,17 @@ export default function ProfileManager({ onUpdate, onToast }: ProfileManagerProp
               min={0}
               value={profile.experience_years}
               onChange={(e) => setProfile({ ...profile, experience_years: parseInt(e.target.value) || 0 })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-black"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-navy-800 mb-2">Months of Experience</label>
+            <input
+              type="number"
+              min={0}
+              max={11}
+              value={profile.experience_months}
+              onChange={(e) => setProfile({ ...profile, experience_months: parseInt(e.target.value) || 0 })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-black"
             />
           </div>

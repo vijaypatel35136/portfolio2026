@@ -48,6 +48,7 @@ interface Profile {
   github: string
   location: string
   experience_years: number
+  experience_months: number
   projects_count: number
   education?: string
   resume_pdf?: string
@@ -112,9 +113,26 @@ export default function Home({ darkMode = true }: HomeProps) {
   const [loading, setLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState('All')
 
-  const taglineRoles = profile?.tagline_roles || ['Developer', 'Designer', 'Creator']
+  const taglineRoles = profile?.tagline_roles || ['Shopify Developer', 'Python Django Developer', 'WordPress Developer']
 
   const roleText = useTypewriter(taglineRoles, 80, 40, 1600)
+
+  // Format experience duration
+  const formatExperience = () => {
+    const years = profile?.experience_years || 0
+    const months = profile?.experience_months || 0
+    
+    if (years === 0 && months === 0) return 'entry-level'
+    if (years === 0) return `${months} month${months > 1 ? 's' : ''}`
+    if (months === 0) return `${years} year${years > 1 ? 's' : ''}`
+    return `${years} year${years > 1 ? 's' : ''} ${months} month${months > 1 ? 's' : ''}`
+  }
+
+  // Format summary with dynamic experience
+  const formatSummary = (summary: string) => {
+    const experience = formatExperience()
+    return summary.replace(/\{experience\}/g, experience)
+  }
 
   const skillsByCategory = skills.reduce((acc, skill) => {
     if (!acc[skill.category]) acc[skill.category] = []
@@ -229,8 +247,9 @@ export default function Home({ darkMode = true }: HomeProps) {
               className="text-lg max-w-2xl mb-10 leading-relaxed"
               style={{ color: 'var(--ink-300)' }}
             >
-              {profile?.summary ||
-                'Results-driven Shopify Liquid, Python, and WordPress developer with 2+ years of experience building high-converting eCommerce storefronts, internal business systems, and content-managed websites.'}
+              {profile?.summary
+                ? formatSummary(profile.summary)
+                : `Results-driven Shopify Liquid, Python, and WordPress developer with ${formatExperience()} of experience building high-converting eCommerce storefronts, internal business systems, and content-managed websites.`}
             </motion.p>
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="flex flex-wrap gap-4 mb-12">
@@ -294,8 +313,9 @@ export default function Home({ darkMode = true }: HomeProps) {
 
             <div className="grid md:grid-cols-2 gap-12">
               <p className="text-lg leading-relaxed" style={{ color: 'var(--ink-300)' }}>
-                {profile?.summary ||
-                  'Results-driven Shopify Liquid, Python, and WordPress developer with 2+ years of experience building custom, high-converting eCommerce storefronts, internal business systems, and content-managed websites. Skilled in Liquid templating, Python application development, custom theme development, Shopify app/API integrations, headless CMS (Contentful), React front ends, and performance optimization.'}
+                {profile?.summary
+                  ? formatSummary(profile.summary)
+                  : `Results-driven Shopify Liquid, Python, and WordPress developer with ${formatExperience()} of experience building custom, high-converting eCommerce storefronts, internal business systems, and content-managed websites. Skilled in Liquid templating, Python application development, custom theme development, Shopify app/API integrations, headless CMS (Contentful), React front ends, and performance optimization.`}
               </p>
 
               <div className="grid grid-cols-2 gap-4">

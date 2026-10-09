@@ -66,6 +66,7 @@ export async function initDatabase() {
         github TEXT DEFAULT 'https://vijaybhesaniya.github.io/portfolio/',
         location TEXT DEFAULT 'Ahmedabad, Gujarat, India',
         experience_years INTEGER DEFAULT 2,
+        experience_months INTEGER DEFAULT 0,
         projects_count INTEGER DEFAULT 15,
         education TEXT,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -182,14 +183,15 @@ export async function initDatabase() {
     const profileResult = await client.query("SELECT * FROM profile WHERE id = 1")
     if (profileResult.rows.length === 0) {
       await client.query(`
-        INSERT INTO profile (id, name, tagline_roles, summary, location, experience_years, projects_count, education)
-        VALUES (1, $1, $2, $3, $4, $5, $6, $7)
+        INSERT INTO profile (id, name, tagline_roles, summary, location, experience_years, experience_months, projects_count, education)
+        VALUES (1, $1, $2, $3, $4, $5, $6, $7, $8)
       `, [
         'Vijay Bhesaniya',
         JSON.stringify(['Shopify Liquid Developer', 'Python Developer', 'WordPress Developer', 'eCommerce Performance Specialist']),
         'Results-driven Shopify Liquid, Python, and WordPress Developer with 2+ years of experience building high-converting eCommerce storefronts, internal business systems, and content-managed websites.',
         'Ahmedabad, Gujarat, India',
         2,
+        0,
         15,
         'Bachelor of Engineering — Computer Engineering, Om Engineering College, Junagadh, Gujarat | 2019 – 2023'
       ])
