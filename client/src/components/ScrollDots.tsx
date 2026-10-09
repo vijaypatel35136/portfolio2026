@@ -1,20 +1,20 @@
 import { useState, useEffect } from 'react'
 
 const sections = [
-  { id: 'hero',       label: '01' },
-  { id: 'about',      label: '02' },
-  { id: 'skills',     label: '03' },
-  { id: 'experience', label: '04' },
-  { id: 'projects',   label: '05' },
-  { id: 'education',  label: '06' },
-  { id: 'contact',    label: '07' },
+  { id: 'hero',       label: 'Intro' },
+  { id: 'about',      label: 'About' },
+  { id: 'skills',     label: 'Stack' },
+  { id: 'experience', label: 'Experience' },
+  { id: 'projects',   label: 'Work' },
+  { id: 'education',  label: 'Education' },
+  { id: 'contact',    label: 'Contact' },
 ]
 
 interface ScrollDotsProps {
   darkMode?: boolean
 }
 
-export default function ScrollDots({ darkMode = true }: ScrollDotsProps) {
+export default function ScrollDots(_props: ScrollDotsProps) {
   const [activeSection, setActiveSection] = useState('hero')
 
   /* ── Scroll position handler for side dots ── */
@@ -75,12 +75,10 @@ export default function ScrollDots({ darkMode = true }: ScrollDotsProps) {
           className={`scroll-dot ${
             activeSection === section.id ? 'active' : ''
           }`}
-          style={{
-            '--border-line': darkMode ? '#1c2740' : '#e5e7eb',
-            '--teal-500': darkMode ? '#0e7c7b' : '#0d9488'
-          } as React.CSSProperties}
           aria-label={`Scroll to ${section.id}`}
-        />
+        >
+          <span>{section.label}</span>
+        </button>
       ))}
     </div>
   )

@@ -27,7 +27,7 @@ export function AppRoutes({ darkMode, setDarkMode }: AppRoutesProps) {
 
       {/* Admin routes */}
       <Route path="/vijay_dev" element={<AdminLogin />} />
-      <Route path="/vijay_dev/dashboard" element={<AdminDashboard />} />
+      <Route path="/vijay_dev/dashboard" element={<AdminDashboard darkMode={darkMode} setDarkMode={setDarkMode} />} />
 
       {/* Catch all - redirect to home */}
       <Route path="*" element={<Navigate to="/" replace />} />

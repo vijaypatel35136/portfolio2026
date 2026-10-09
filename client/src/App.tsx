@@ -39,15 +39,37 @@ function App() {
     return () => mq.removeEventListener('change', onChange)
   }, [])
 
+  /* Cursor spotlight: feeds --mx/--my to whichever .panel is under the pointer */
+  useEffect(() => {
+    const onMove = (e: PointerEvent) => {
+      const card = (e.target as HTMLElement | null)?.closest?.('.panel') as HTMLElement | null
+      if (!card) return
+      const r = card.getBoundingClientRect()
+      card.style.setProperty('--mx', `${e.clientX - r.left}px`)
+      card.style.setProperty('--my', `${e.clientY - r.top}px`)
+    }
+    window.addEventListener('pointermove', onMove, { passive: true })
+    return () => window.removeEventListener('pointermove', onMove)
+  }, [])
+
   return (
     <div
-      className="min-h-screen transition-colors duration-300"
+      className="min-h-screen relative transition-colors duration-300"
       style={{
         background: 'var(--bg-void)',
         color: 'var(--ink-100)',
       }}
     >
-      <AppRoutes darkMode={darkMode} setDarkMode={setDarkMode} />
+      {/* Shared atmosphere for every page */}
+      <div className="aurora" aria-hidden>
+        <i /><i /><i />
+      </div>
+      <div className="fixed inset-0 grid-bg pointer-events-none z-0" aria-hidden />
+      <div className="fixed inset-0 noise pointer-events-none z-0" aria-hidden />
+
+      <div className="relative z-10">
+        <AppRoutes darkMode={darkMode} setDarkMode={setDarkMode} />
+      </div>
     </div>
   )
 }
