@@ -8,28 +8,6 @@ import { getExperiences } from '../services/experienceService'
 import { getProjects } from '../services/projectService'
 import { getEducation } from '../services/educationService'
 
-// Default fallback profile data when database is initializing
-const fallbackProfile = {
-  name: 'Vijay Bhesaniya',
-  tagline_roles: [
-    'Shopify Liquid Developer',
-    'Python Developer',
-    'WordPress Developer',
-    'eCommerce Performance Specialist',
-  ],
-  summary:
-    'Results-driven Shopify Liquid, Python, and WordPress Developer with 2+ years of experience building high-converting eCommerce storefronts, internal business systems, and content-managed websites.',
-  email: 'bhesaniyav38@gmail.com',
-  phone: '+91 95104 26764',
-  linkedin: 'https://linkedin.com/in/bhesaniya-vijay-355b7020b',
-  github: 'https://vijaybhesaniya.github.io/portfolio/',
-  location: 'Ahmedabad, Gujarat, India',
-  experience_years: 2,
-  projects_count: 15,
-  education:
-    'Bachelor of Engineering — Computer Engineering, Om Engineering College, Junagadh, Gujarat | 2019 – 2023',
-}
-
 // Typewriter hook
 function useTypewriter(texts: string[], speed = 80, deleteSpeed = 40, pauseTime = 2000) {
   const [displayText, setDisplayText] = useState('')
@@ -134,7 +112,7 @@ export default function Home({ darkMode = true }: HomeProps) {
   const [loading, setLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState('All')
 
-  const taglineRoles = profile?.tagline_roles || fallbackProfile.tagline_roles
+  const taglineRoles = profile?.tagline_roles || ['Developer', 'Designer', 'Creator']
 
   const roleText = useTypewriter(taglineRoles, 80, 40, 1600)
 
@@ -162,8 +140,6 @@ export default function Home({ darkMode = true }: HomeProps) {
 
         if (profData.status === 'fulfilled' && profData.value) {
           setProfile(profData.value as unknown as Profile)
-        } else {
-          setProfile(fallbackProfile as unknown as Profile)
         }
 
         if (skillsData.status === 'fulfilled') setSkills((skillsData.value || []) as unknown as Skill[])
@@ -172,7 +148,6 @@ export default function Home({ darkMode = true }: HomeProps) {
         if (eduData.status === 'fulfilled') setEducation((eduData.value || []) as unknown as Education[])
       } catch (err) {
         console.error('Error loading Supabase portfolio data:', err)
-        setProfile(fallbackProfile as unknown as Profile)
       } finally {
         setLoading(false)
       }
