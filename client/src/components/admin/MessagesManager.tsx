@@ -17,9 +17,10 @@ interface Message {
 interface MessagesManagerProps {
   onUpdate: () => void
   onToast?: (message: string, type: 'success' | 'error') => void
+  darkMode?: boolean
 }
 
-export default function MessagesManager({ onUpdate, onToast }: MessagesManagerProps) {
+export default function MessagesManager({ onUpdate, onToast, darkMode = true }: MessagesManagerProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null)
   const [loading, setLoading] = useState(true)
@@ -74,9 +75,13 @@ export default function MessagesManager({ onUpdate, onToast }: MessagesManagerPr
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+      <div className={`rounded-xl border p-8 text-center ${
+        darkMode
+          ? 'bg-navy-800 border-navy-700'
+          : 'bg-white border-gray-200'
+      }`}>
         <div className="w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="text-gray-500 mt-4">Loading messages...</p>
+        <p className={`mt-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Loading messages...</p>
       </div>
     )
   }
@@ -92,17 +97,31 @@ export default function MessagesManager({ onUpdate, onToast }: MessagesManagerPr
       />
 
       {messages.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-          <Mail className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="font-heading text-xl font-semibold text-gray-600 mb-2">No messages yet</h3>
-          <p className="text-gray-500">Contact form submissions will appear here</p>
+        <div className={`rounded-xl border p-12 text-center ${
+          darkMode
+            ? 'bg-navy-800 border-navy-700'
+            : 'bg-white border-gray-200'
+        }`}>
+          <Mail className={`w-16 h-16 mx-auto mb-4 ${darkMode ? 'text-gray-500' : 'text-gray-300'}`} />
+          <h3 className={`font-heading text-xl font-semibold mb-2 ${
+            darkMode ? 'text-gray-400' : 'text-gray-600'
+          }`}>No messages yet</h3>
+          <p className={darkMode ? 'text-gray-500' : 'text-gray-500'}>Contact form submissions will appear here</p>
         </div>
       ) : (
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Messages List */}
-          <div className="lg:col-span-1 bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <div className="p-4 border-b border-gray-200">
-              <h3 className="font-heading font-semibold text-navy-800">
+          <div className={`lg:col-span-1 rounded-xl border overflow-hidden ${
+            darkMode
+              ? 'bg-navy-800 border-navy-700'
+              : 'bg-white border-gray-200'
+          }`}>
+            <div className={`p-4 border-b ${
+              darkMode ? 'border-navy-700' : 'border-gray-200'
+            }`}>
+              <h3 className={`font-heading font-semibold ${
+                darkMode ? 'text-white' : 'text-navy-800'
+              }`}>
                 Inbox ({messages.filter((m) => !m.is_read).length} unread)
               </h3>
             </div>
@@ -110,29 +129,48 @@ export default function MessagesManager({ onUpdate, onToast }: MessagesManagerPr
               {messages.map((message) => (
                 <motion.div
                   key={message.id}
-                  whileHover={{ backgroundColor: '#f9fafb' }}
+                  whileHover={{ backgroundColor: darkMode ? '#1e3a5f' : '#f9fafb' }}
                   onClick={() => openMessage(message)}
-                  className={`p-4 border-b border-gray-100 cursor-pointer ${
-                    selectedMessage?.id === message.id ? 'bg-teal-50' : ''
-                  } ${!message.is_read ? 'bg-blue-50' : ''}`}
+                  className={`p-4 border-b cursor-pointer ${
+                    darkMode ? 'border-navy-700' : 'border-gray-100'
+                  } ${
+                    selectedMessage?.id === message.id
+                      ? darkMode
+                        ? 'bg-teal-900/30'
+                        : 'bg-teal-50'
+                      : ''
+                  } ${!message.is_read
+                    ? darkMode
+                      ? 'bg-blue-900/30'
+                      : 'bg-blue-50'
+                    : ''
+                  }`}
                 >
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <div className="flex items-center gap-2">
                       {message.is_read ? (
-                        <MailOpen className="w-4 h-4 text-gray-400" />
+                        <MailOpen className={`w-4 h-4 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} />
                       ) : (
-                        <Mail className="w-4 h-4 text-blue-600" />
+                        <Mail className={`w-4 h-4 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`} />
                       )}
-                      <p className={`font-semibold text-sm ${!message.is_read ? 'text-navy-800' : 'text-gray-700'}`}>
+                      <p className={`font-semibold text-sm ${
+                        !message.is_read
+                          ? darkMode
+                            ? 'text-white'
+                            : 'text-navy-800'
+                          : darkMode
+                            ? 'text-gray-400'
+                            : 'text-gray-700'
+                      }`}>
                         {message.name}
                       </p>
                     </div>
-                    <p className="text-xs text-gray-500">
+                    <p className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
                       {new Date(message.created_at).toLocaleDateString()}
                     </p>
                   </div>
-                  <p className="text-sm text-gray-600 truncate">{message.email}</p>
-                  <p className="text-sm text-gray-500 truncate mt-1">{message.message}</p>
+                  <p className={`text-sm truncate ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{message.email}</p>
+                  <p className={`text-sm truncate mt-1 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>{message.message}</p>
                 </motion.div>
               ))}
             </div>
@@ -147,34 +185,52 @@ export default function MessagesManager({ onUpdate, onToast }: MessagesManagerPr
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="bg-white rounded-xl border border-gray-200 p-6"
+                  className={`rounded-xl border p-6 ${
+                    darkMode
+                      ? 'bg-navy-800 border-navy-700'
+                      : 'bg-white border-gray-200'
+                  }`}
                 >
                   <div className="flex items-start justify-between mb-6">
                     <div>
-                      <h3 className="font-heading text-xl font-bold text-navy-800 mb-2">
+                      <h3 className={`font-heading text-xl font-bold mb-2 ${
+                        darkMode ? 'text-white' : 'text-navy-800'
+                      }`}>
                         {selectedMessage.name}
                       </h3>
                       <a
                         href={`mailto:${selectedMessage.email}`}
-                        className="text-teal-600 hover:underline"
+                        className={`hover:underline ${
+                          darkMode ? 'text-teal-400' : 'text-teal-600'
+                        }`}
                       >
                         {selectedMessage.email}
                       </a>
-                      <p className="text-sm text-gray-500 mt-1">
+                      <p className={`text-sm mt-1 ${
+                        darkMode ? 'text-gray-400' : 'text-gray-500'
+                      }`}>
                         {new Date(selectedMessage.created_at).toLocaleString()}
                       </p>
                     </div>
                     <div className="flex gap-2">
                       <button
                         onClick={() => setDeleteId(selectedMessage.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className={`p-2 rounded-lg transition-colors ${
+                          darkMode
+                            ? 'text-red-400 hover:bg-red-900/30'
+                            : 'text-red-600 hover:bg-red-50'
+                        }`}
                         title="Delete"
                       >
                         <Trash2 size={18} />
                       </button>
                       <button
                         onClick={() => setSelectedMessage(null)}
-                        className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        className={`p-2 rounded-lg transition-colors ${
+                          darkMode
+                            ? 'text-gray-400 hover:bg-navy-700'
+                            : 'text-gray-600 hover:bg-gray-100'
+                        }`}
                         title="Close"
                       >
                         <X size={18} />
@@ -184,24 +240,38 @@ export default function MessagesManager({ onUpdate, onToast }: MessagesManagerPr
 
                   {selectedMessage.subject && (
                     <div className="mb-4">
-                      <p className="text-sm text-gray-500 mb-1">Subject:</p>
-                      <p className="font-semibold text-navy-800">{selectedMessage.subject}</p>
+                      <p className={`text-sm mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Subject:</p>
+                      <p className={`font-semibold ${
+                        darkMode ? 'text-white' : 'text-navy-800'
+                      }`}>{selectedMessage.subject}</p>
                     </div>
                   )}
 
                   <div>
-                    <p className="text-sm text-gray-500 mb-2">Message:</p>
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">
+                    <p className={`text-sm mb-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Message:</p>
+                    <div className={`rounded-lg p-4 ${
+                      darkMode
+                        ? 'bg-navy-900/30'
+                        : 'bg-gray-50'
+                    }`}>
+                      <p className={`whitespace-pre-wrap leading-relaxed ${
+                        darkMode ? 'text-gray-200' : 'text-gray-800'
+                      }`}>
                         {selectedMessage.message}
                       </p>
                     </div>
                   </div>
 
-                  <div className="mt-6 pt-6 border-t border-gray-200">
+                  <div className={`mt-6 pt-6 border-t ${
+                    darkMode ? 'border-navy-700' : 'border-gray-200'
+                  }`}>
                     <a
                       href={`mailto:${selectedMessage.email}?subject=Re: ${selectedMessage.subject || 'Your message'}`}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                        darkMode
+                          ? 'bg-teal-600 text-white hover:bg-teal-700'
+                          : 'bg-teal-500 text-white hover:bg-teal-600'
+                      }`}
                     >
                       <Mail size={18} />
                       Reply via Email
@@ -212,11 +282,15 @@ export default function MessagesManager({ onUpdate, onToast }: MessagesManagerPr
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="bg-white rounded-xl border border-gray-200 p-12 text-center h-full flex items-center justify-center"
+                  className={`rounded-xl border p-12 text-center h-full flex items-center justify-center ${
+                    darkMode
+                      ? 'bg-navy-800 border-navy-700'
+                      : 'bg-white border-gray-200'
+                  }`}
                 >
                   <div>
-                    <Mail className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">Select a message to view details</p>
+                    <Mail className={`w-16 h-16 mx-auto mb-4 ${darkMode ? 'text-gray-500' : 'text-gray-300'}`} />
+                    <p className={darkMode ? 'text-gray-400' : 'text-gray-500'}>Select a message to view details</p>
                   </div>
                 </motion.div>
               )}

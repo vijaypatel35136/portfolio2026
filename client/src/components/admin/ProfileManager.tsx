@@ -22,9 +22,10 @@ interface ProfileForm {
 interface ProfileManagerProps {
   onUpdate: () => void
   onToast?: (message: string, type: 'success' | 'error') => void
+  darkMode?: boolean
 }
 
-export default function ProfileManager({ onUpdate, onToast }: ProfileManagerProps) {
+export default function ProfileManager({ onUpdate, onToast, darkMode = true }: ProfileManagerProps) {
   const [profile, setProfile] = useState<ProfileForm | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -92,6 +93,7 @@ export default function ProfileManager({ onUpdate, onToast }: ProfileManagerProp
         github: profile.github,
         location: profile.location,
         experience_years: profile.experience_years,
+        experience_months: profile.experience_months,
         projects_count: profile.projects_count,
       })
       await fetchProfile()
@@ -177,16 +179,24 @@ export default function ProfileManager({ onUpdate, onToast }: ProfileManagerProp
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+      <div className={`rounded-xl border p-8 text-center ${
+        darkMode
+          ? 'bg-navy-800 border-navy-700'
+          : 'bg-white border-gray-200'
+      }`}>
         <div className="w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="text-gray-500 mt-4">Loading profile...</p>
+        <p className={`mt-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Loading profile...</p>
       </div>
     )
   }
 
   if (!profile) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+      <div className={`rounded-xl border p-8 text-center ${
+        darkMode
+          ? 'bg-navy-800 border-navy-700'
+          : 'bg-white border-gray-200'
+      }`}>
         <p className="text-red-500">Failed to load profile</p>
       </div>
     )
@@ -196,35 +206,55 @@ export default function ProfileManager({ onUpdate, onToast }: ProfileManagerProp
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-xl border border-gray-200 p-8"
+      className={`rounded-xl border p-8 ${
+        darkMode
+          ? 'bg-navy-800 border-navy-700'
+          : 'bg-white border-gray-200'
+      }`}
     >
-      <h2 className="font-heading text-2xl font-bold text-navy-800 mb-6">Edit Profile</h2>
+      <h2 className={`font-heading text-2xl font-bold mb-6 ${
+        darkMode ? 'text-white' : 'text-navy-800'
+      }`}>Edit Profile</h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-semibold text-navy-800 mb-2">Full Name</label>
+            <label className={`block text-sm font-semibold mb-2 ${
+              darkMode ? 'text-gray-300' : 'text-navy-800'
+            }`}>Full Name</label>
             <input
               type="text"
               value={profile.name}
               onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-black"
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                darkMode
+                  ? 'bg-navy-700 border-navy-600 text-white'
+                  : 'bg-gray-50 border-gray-300 text-black'
+              }`}
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-navy-800 mb-2">Location</label>
+            <label className={`block text-sm font-semibold mb-2 ${
+              darkMode ? 'text-gray-300' : 'text-navy-800'
+            }`}>Location</label>
             <input
               type="text"
               value={profile.location}
               onChange={(e) => setProfile({ ...profile, location: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-black"
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                darkMode
+                  ? 'bg-navy-700 border-navy-600 text-white'
+                  : 'bg-gray-50 border-gray-300 text-black'
+              }`}
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-navy-800 mb-2">Tagline Roles</label>
+          <label className={`block text-sm font-semibold mb-2 ${
+            darkMode ? 'text-gray-300' : 'text-navy-800'
+          }`}>Tagline Roles</label>
           <div className="space-y-2">
             {profile.tagline_roles.map((role, index) => (
               <div key={index} className="flex gap-2">
@@ -232,13 +262,21 @@ export default function ProfileManager({ onUpdate, onToast }: ProfileManagerProp
                   type="text"
                   value={role}
                   onChange={(e) => handleRoleChange(index, e.target.value)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-black"
+                  className={`flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                    darkMode
+                      ? 'bg-navy-700 border-navy-600 text-white'
+                      : 'bg-gray-50 border-gray-300 text-black'
+                  }`}
                   placeholder="e.g., Shopify Developer"
                 />
                 <button
                   type="button"
                   onClick={() => removeRole(index)}
-                  className="px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    darkMode
+                      ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50'
+                      : 'bg-red-100 text-red-600 hover:bg-red-200'
+                  }`}
                 >
                   Remove
                 </button>
@@ -247,7 +285,11 @@ export default function ProfileManager({ onUpdate, onToast }: ProfileManagerProp
             <button
               type="button"
               onClick={addRole}
-              className="px-4 py-2 bg-teal-100 text-teal-700 rounded-lg hover:bg-teal-200 transition-colors"
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                darkMode
+                  ? 'bg-teal-900/30 text-teal-400 hover:bg-teal-900/50'
+                  : 'bg-teal-100 text-teal-700 hover:bg-teal-200'
+              }`}
             >
               + Add Role
             </button>
@@ -255,87 +297,135 @@ export default function ProfileManager({ onUpdate, onToast }: ProfileManagerProp
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-navy-800 mb-2">Summary / Bio</label>
+          <label className={`block text-sm font-semibold mb-2 ${
+            darkMode ? 'text-gray-300' : 'text-navy-800'
+          }`}>Summary / Bio</label>
           <textarea
             value={profile.summary}
             onChange={(e) => setProfile({ ...profile, summary: e.target.value })}
             rows={4}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-black"
+            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+              darkMode
+                ? 'bg-navy-700 border-navy-600 text-white'
+                : 'bg-gray-50 border-gray-300 text-black'
+            }`}
           />
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-semibold text-navy-800 mb-2">Email</label>
+            <label className={`block text-sm font-semibold mb-2 ${
+              darkMode ? 'text-gray-300' : 'text-navy-800'
+            }`}>Email</label>
             <input
               type="email"
               value={profile.email}
               onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-black"
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                darkMode
+                  ? 'bg-navy-700 border-navy-600 text-white'
+                  : 'bg-gray-50 border-gray-300 text-black'
+              }`}
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-navy-800 mb-2">Phone</label>
+            <label className={`block text-sm font-semibold mb-2 ${
+              darkMode ? 'text-gray-300' : 'text-navy-800'
+            }`}>Phone</label>
             <input
               type="text"
               value={profile.phone}
               onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-black"
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                darkMode
+                  ? 'bg-navy-700 border-navy-600 text-white'
+                  : 'bg-gray-50 border-gray-300 text-black'
+              }`}
             />
           </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-semibold text-navy-800 mb-2">LinkedIn URL</label>
+            <label className={`block text-sm font-semibold mb-2 ${
+              darkMode ? 'text-gray-300' : 'text-navy-800'
+            }`}>LinkedIn URL</label>
             <input
               type="url"
               value={profile.linkedin}
               onChange={(e) => setProfile({ ...profile, linkedin: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-black"
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                darkMode
+                  ? 'bg-navy-700 border-navy-600 text-white'
+                  : 'bg-gray-50 border-gray-300 text-black'
+              }`}
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-navy-800 mb-2">GitHub / Portfolio URL</label>
+            <label className={`block text-sm font-semibold mb-2 ${
+              darkMode ? 'text-gray-300' : 'text-navy-800'
+            }`}>GitHub / Portfolio URL</label>
             <input
               type="url"
               value={profile.github}
               onChange={(e) => setProfile({ ...profile, github: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-black"
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                darkMode
+                  ? 'bg-navy-700 border-navy-600 text-white'
+                  : 'bg-gray-50 border-gray-300 text-black'
+              }`}
             />
           </div>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
           <div>
-            <label className="block text-sm font-semibold text-navy-800 mb-2">Years of Experience</label>
+            <label className={`block text-sm font-semibold mb-2 ${
+              darkMode ? 'text-gray-300' : 'text-navy-800'
+            }`}>Years of Experience</label>
             <input
               type="number"
               min={0}
               value={profile.experience_years}
               onChange={(e) => setProfile({ ...profile, experience_years: parseInt(e.target.value) || 0 })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-black"
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                darkMode
+                  ? 'bg-navy-700 border-navy-600 text-white'
+                  : 'bg-gray-50 border-gray-300 text-black'
+              }`}
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-navy-800 mb-2">Months of Experience</label>
+            <label className={`block text-sm font-semibold mb-2 ${
+              darkMode ? 'text-gray-300' : 'text-navy-800'
+            }`}>Months of Experience</label>
             <input
               type="number"
               min={0}
               max={11}
               value={profile.experience_months}
               onChange={(e) => setProfile({ ...profile, experience_months: parseInt(e.target.value) || 0 })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-black"
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                darkMode
+                  ? 'bg-navy-700 border-navy-600 text-white'
+                  : 'bg-gray-50 border-gray-300 text-black'
+              }`}
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-navy-800 mb-2">Projects Completed</label>
+            <label className={`block text-sm font-semibold mb-2 ${
+              darkMode ? 'text-gray-300' : 'text-navy-800'
+            }`}>Projects Completed</label>
             <input
               type="number"
               min={0}
               value={profile.projects_count}
               onChange={(e) => setProfile({ ...profile, projects_count: parseInt(e.target.value) || 0 })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-black"
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                darkMode
+                  ? 'bg-navy-700 border-navy-600 text-white'
+                  : 'bg-gray-50 border-gray-300 text-black'
+              }`}
             />
           </div>
         </div>
@@ -344,7 +434,11 @@ export default function ProfileManager({ onUpdate, onToast }: ProfileManagerProp
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-colors disabled:opacity-50 ${
+              darkMode
+                ? 'bg-teal-600 text-white hover:bg-teal-700'
+                : 'bg-teal-500 text-white hover:bg-teal-600'
+            }`}
           >
             {saving ? (
               <>

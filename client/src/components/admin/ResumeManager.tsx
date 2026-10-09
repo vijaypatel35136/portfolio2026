@@ -6,9 +6,10 @@ import { getResumes, uploadResumeFile, setActiveResume, deleteResumeFile, Resume
 interface ResumeManagerProps {
   onUpdate: () => void
   onToast?: (message: string, type: 'success' | 'error') => void
+  darkMode?: boolean
 }
 
-export default function ResumeManager({ onUpdate, onToast }: ResumeManagerProps) {
+export default function ResumeManager({ onUpdate, onToast, darkMode = true }: ResumeManagerProps) {
   const [resumes, setResumes] = useState<Resume[]>([])
   const [uploading, setUploading] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -85,10 +86,14 @@ export default function ResumeManager({ onUpdate, onToast }: ResumeManagerProps)
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-xl border border-gray-200 p-8 text-center"
+        className={`rounded-xl border p-8 text-center ${
+          darkMode
+            ? 'bg-navy-800 border-navy-700'
+            : 'bg-white border-gray-200'
+        }`}
       >
-        <Loader className="animate-spin mx-auto text-teal-600" size={32} />
-        <p className="text-gray-500 mt-4">Loading resumes...</p>
+        <Loader className={`animate-spin mx-auto ${darkMode ? 'text-teal-400' : 'text-teal-600'}`} size={32} />
+        <p className={`mt-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Loading resumes...</p>
       </motion.div>
     )
   }
@@ -97,12 +102,22 @@ export default function ResumeManager({ onUpdate, onToast }: ResumeManagerProps)
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-xl border border-gray-200 p-8"
+      className={`rounded-xl border p-8 ${
+        darkMode
+          ? 'bg-navy-800 border-navy-700'
+          : 'bg-white border-gray-200'
+      }`}
     >
-      <h2 className="font-heading text-2xl font-bold text-navy-800 mb-6">Resume Management</h2>
+      <h2 className={`font-heading text-2xl font-bold mb-6 ${
+        darkMode ? 'text-white' : 'text-navy-800'
+      }`}>Resume Management</h2>
 
       <div className="mb-6">
-        <label className="flex items-center gap-2 px-6 py-3 bg-teal-50 text-teal-700 rounded-lg hover:bg-teal-100 transition-colors cursor-pointer w-fit">
+        <label className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-colors cursor-pointer w-fit ${
+          darkMode
+            ? 'bg-teal-900/30 text-teal-400 hover:bg-teal-900/50'
+            : 'bg-teal-50 text-teal-700 hover:bg-teal-100'
+        }`}>
           {uploading ? (
             <>
               <Loader className="animate-spin" size={18} />
@@ -122,20 +137,28 @@ export default function ResumeManager({ onUpdate, onToast }: ResumeManagerProps)
             className="hidden"
           />
         </label>
-        <p className="text-sm text-gray-500 mt-2">
+        <p className={`text-sm mt-2 ${
+          darkMode ? 'text-gray-400' : 'text-gray-500'
+        }`}>
           Upload your resume PDF. Files are stored securely in Supabase Storage.
         </p>
       </div>
 
       {resumes.length === 0 ? (
-        <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-          <FileText className="text-gray-400 mx-auto mb-3" size={48} />
-          <p className="text-gray-600 font-medium">No resumes uploaded yet</p>
-          <p className="text-sm text-gray-500 mt-1">Upload your first resume to get started</p>
+        <div className={`border-2 border-dashed rounded-lg p-8 text-center ${
+          darkMode
+            ? 'bg-navy-900/30 border-navy-700'
+            : 'bg-gray-50 border-gray-300'
+        }`}>
+          <FileText className={`mx-auto mb-3 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} size={48} />
+          <p className={`font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>No resumes uploaded yet</p>
+          <p className={`text-sm mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Upload your first resume to get started</p>
         </div>
       ) : (
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-navy-800 mb-3">
+          <h3 className={`text-sm font-semibold mb-3 ${
+            darkMode ? 'text-white' : 'text-navy-800'
+          }`}>
             Uploaded Resumes ({resumes.length})
           </h3>
           {resumes.map((resume) => (
@@ -143,14 +166,20 @@ export default function ResumeManager({ onUpdate, onToast }: ResumeManagerProps)
               key={resume.id}
               className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all ${
                 resume.is_active
-                  ? 'border-teal-500 bg-teal-50'
-                  : 'border-gray-200 bg-gray-50 hover:border-gray-300'
+                  ? darkMode
+                    ? 'border-teal-500 bg-teal-900/30'
+                    : 'border-teal-500 bg-teal-50'
+                  : darkMode
+                    ? 'border-navy-700 bg-navy-900/30 hover:border-navy-600'
+                    : 'border-gray-200 bg-gray-50 hover:border-gray-300'
               }`}
             >
               <div className="flex items-center gap-3 flex-1">
-                <FileText className="text-teal-600 flex-shrink-0" size={24} />
+                <FileText className={`flex-shrink-0 ${darkMode ? 'text-teal-400' : 'text-teal-600'}`} size={24} />
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-navy-800 flex items-center gap-2 truncate">
+                  <p className={`font-semibold flex items-center gap-2 truncate ${
+                    darkMode ? 'text-white' : 'text-navy-800'
+                  }`}>
                     {resume.original_name}
                     {resume.is_active && (
                       <span className="text-xs bg-teal-600 text-white px-2 py-0.5 rounded flex-shrink-0">
@@ -158,7 +187,7 @@ export default function ResumeManager({ onUpdate, onToast }: ResumeManagerProps)
                       </span>
                     )}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                     {(resume.file_size / 1024).toFixed(0)} KB • Uploaded{' '}
                     {new Date(resume.uploaded_at).toLocaleDateString()}
                   </p>
@@ -169,14 +198,22 @@ export default function ResumeManager({ onUpdate, onToast }: ResumeManagerProps)
                   href={resume.public_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1.5 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
+                  className={`px-3 py-1.5 text-sm rounded transition-colors ${
+                    darkMode
+                      ? 'bg-navy-700 text-gray-300 hover:bg-navy-600'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
                 >
                   View
                 </a>
                 <a
                   href={resume.public_url}
                   download={resume.original_name}
-                  className="px-3 py-1.5 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors flex items-center gap-1"
+                  className={`px-3 py-1.5 text-sm rounded transition-colors flex items-center gap-1 ${
+                    darkMode
+                      ? 'bg-blue-900/30 text-blue-400 hover:bg-blue-900/50'
+                      : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                  }`}
                   title="Download resume"
                 >
                   <Download size={14} />
@@ -185,7 +222,11 @@ export default function ResumeManager({ onUpdate, onToast }: ResumeManagerProps)
                 {!resume.is_active && (
                   <button
                     onClick={() => handleSetActive(resume.id)}
-                    className="px-3 py-1.5 text-sm bg-teal-100 text-teal-700 rounded hover:bg-teal-200 transition-colors flex items-center gap-1"
+                    className={`px-3 py-1.5 text-sm rounded transition-colors flex items-center gap-1 ${
+                      darkMode
+                        ? 'bg-teal-900/30 text-teal-400 hover:bg-teal-900/50'
+                        : 'bg-teal-100 text-teal-700 hover:bg-teal-200'
+                    }`}
                   >
                     <Check size={14} />
                     Set Active
@@ -193,7 +234,11 @@ export default function ResumeManager({ onUpdate, onToast }: ResumeManagerProps)
                 )}
                 <button
                   onClick={() => handleDeleteResume(resume.id)}
-                  className="px-3 py-1.5 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
+                  className={`px-3 py-1.5 text-sm rounded transition-colors ${
+                    darkMode
+                      ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50'
+                      : 'bg-red-100 text-red-600 hover:bg-red-200'
+                  }`}
                   title="Delete resume"
                 >
                   <Trash2 size={14} />
@@ -204,13 +249,23 @@ export default function ResumeManager({ onUpdate, onToast }: ResumeManagerProps)
         </div>
       )}
 
-      <div className="mt-6 pt-6 border-t border-gray-200">
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+      <div className={`mt-6 pt-6 border-t ${
+        darkMode ? 'border-navy-700' : 'border-gray-200'
+      }`}>
+        <div className={`border rounded-lg p-4 ${
+          darkMode
+            ? 'bg-blue-900/20 border-blue-900/30'
+            : 'bg-blue-50 border-blue-200'
+        }`}>
+          <h4 className={`font-semibold mb-2 flex items-center gap-2 ${
+            darkMode ? 'text-blue-300' : 'text-blue-900'
+          }`}>
             <FileText size={16} />
             How Resume Management Works
           </h4>
-          <ul className="text-sm text-blue-800 space-y-1">
+          <ul className={`text-sm space-y-1 ${
+            darkMode ? 'text-blue-200' : 'text-blue-800'
+          }`}>
             <li>• Upload multiple resume versions (max 10MB each)</li>
             <li>• Set one resume as "Active" - this will appear on your portfolio</li>
             <li>• Delete old resumes - removes from database and storage</li>

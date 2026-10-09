@@ -13,9 +13,10 @@ interface Skill {
 interface SkillsManagerProps {
   onUpdate: () => void
   onToast?: (message: string, type: 'success' | 'error') => void
+  darkMode?: boolean
 }
 
-export default function SkillsManager({ onUpdate, onToast }: SkillsManagerProps) {
+export default function SkillsManager({ onUpdate, onToast, darkMode = true }: SkillsManagerProps) {
   const [skills, setSkills] = useState<Skill[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -85,9 +86,13 @@ export default function SkillsManager({ onUpdate, onToast }: SkillsManagerProps)
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+      <div className={`rounded-xl border p-8 text-center ${
+        darkMode
+          ? 'bg-navy-800 border-navy-700'
+          : 'bg-white border-gray-200'
+      }`}>
         <div className="w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="text-gray-500 mt-4">Loading skills...</p>
+        <p className={`mt-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Loading skills...</p>
       </div>
     )
   }
@@ -103,10 +108,16 @@ export default function SkillsManager({ onUpdate, onToast }: SkillsManagerProps)
       />
 
       <div className="flex justify-between items-center">
-        <h2 className="font-heading text-2xl font-bold text-navy-800">Skills Manager</h2>
+        <h2 className={`font-heading text-2xl font-bold ${
+          darkMode ? 'text-white' : 'text-navy-800'
+        }`}>Skills Manager</h2>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+            darkMode
+              ? 'bg-teal-600 text-white hover:bg-teal-700'
+              : 'bg-teal-500 text-white hover:bg-teal-600'
+          }`}
         >
           <Plus size={18} />
           Add Skill
@@ -117,29 +128,47 @@ export default function SkillsManager({ onUpdate, onToast }: SkillsManagerProps)
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl border border-gray-200 p-6"
+          className={`rounded-xl border p-6 ${
+            darkMode
+              ? 'bg-navy-800 border-navy-700'
+              : 'bg-white border-gray-200'
+          }`}
         >
-          <h3 className="font-heading text-lg font-semibold text-navy-800 mb-4">Add New Skill</h3>
+          <h3 className={`font-heading text-lg font-semibold mb-4 ${
+            darkMode ? 'text-white' : 'text-navy-800'
+          }`}>Add New Skill</h3>
           <form onSubmit={handleAdd} className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-navy-800 mb-2">Skill Name</label>
+                <label className={`block text-sm font-semibold mb-2 ${
+                  darkMode ? 'text-gray-300' : 'text-navy-800'
+                }`}>Skill Name</label>
                 <input
                   type="text"
                   value={formData.skill}
                   onChange={(e) => setFormData({ ...formData, skill: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-black"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                    darkMode
+                      ? 'bg-navy-700 border-navy-600 text-white'
+                      : 'bg-gray-50 border-gray-300 text-black'
+                  }`}
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-navy-800 mb-2">Category</label>
+                <label className={`block text-sm font-semibold mb-2 ${
+                  darkMode ? 'text-gray-300' : 'text-navy-800'
+                }`}>Category</label>
                 <input
                   type="text"
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                   placeholder="e.g., Frontend, Backend"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-black"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                    darkMode
+                      ? 'bg-navy-700 border-navy-600 text-white'
+                      : 'bg-gray-50 border-gray-300 text-black'
+                  }`}
                   required
                 />
               </div>
@@ -148,14 +177,22 @@ export default function SkillsManager({ onUpdate, onToast }: SkillsManagerProps)
               <button
                 type="button"
                 onClick={() => setShowAddForm(false)}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className={`px-4 py-2 border rounded-lg transition-colors ${
+                  darkMode
+                    ? 'border-navy-600 text-gray-300 hover:bg-navy-700'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
+                className={`px-4 py-2 rounded-lg transition-colors disabled:opacity-50 ${
+                  darkMode
+                    ? 'bg-teal-600 text-white hover:bg-teal-700'
+                    : 'bg-teal-500 text-white hover:bg-teal-600'
+                }`}
               >
                 {saving ? 'Saving...' : 'Add Skill'}
               </button>
@@ -166,15 +203,25 @@ export default function SkillsManager({ onUpdate, onToast }: SkillsManagerProps)
 
       <div className="grid md:grid-cols-2 gap-6">
         {Object.entries(groupedSkills).map(([category, skillList]) => (
-          <div key={category} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-            <h3 className="font-heading text-lg font-bold text-navy-800 mb-4 pb-2 border-b border-gray-100">
+          <div key={category} className={`rounded-xl border p-6 shadow-sm ${
+            darkMode
+              ? 'bg-navy-800 border-navy-700'
+              : 'bg-white border-gray-200'
+          }`}>
+            <h3 className={`font-heading text-lg font-bold mb-4 pb-2 border-b ${
+              darkMode
+                ? 'text-white border-navy-700'
+                : 'text-navy-800 border-gray-100'
+            }`}>
               {category}
             </h3>
             <div className="space-y-3">
               {skillList.map((skill) => (
                 <div
                   key={skill.id}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  className={`flex items-center justify-between p-3 rounded-lg ${
+                    darkMode ? 'bg-navy-700' : 'bg-gray-50'
+                  }`}
                 >
                   {editingId === skill.id ? (
                     <div className="flex gap-2 w-full">
@@ -182,7 +229,11 @@ export default function SkillsManager({ onUpdate, onToast }: SkillsManagerProps)
                         type="text"
                         defaultValue={skill.skill}
                         id={`skill-${skill.id}`}
-                        className="flex-1 px-3 py-1.5 border border-gray-300 rounded text-sm text-black"
+                        className={`flex-1 px-3 py-1.5 border rounded text-sm ${
+                          darkMode
+                            ? 'bg-navy-600 border-navy-500 text-white'
+                            : 'bg-white border-gray-300 text-black'
+                        }`}
                       />
                       <button
                         disabled={saving}
@@ -190,30 +241,46 @@ export default function SkillsManager({ onUpdate, onToast }: SkillsManagerProps)
                           const input = document.getElementById(`skill-${skill.id}`) as HTMLInputElement
                           handleUpdate(skill.id, { category: skill.category, skill: input.value })
                         }}
-                        className="p-2 text-green-600 hover:bg-green-50 rounded transition-colors disabled:opacity-50"
+                        className={`p-2 rounded transition-colors disabled:opacity-50 ${
+                          darkMode
+                            ? 'text-green-400 hover:bg-green-900/30'
+                            : 'text-green-600 hover:bg-green-50'
+                        }`}
                       >
                         <Save size={16} />
                       </button>
                       <button
                         onClick={() => setEditingId(null)}
-                        className="p-2 text-gray-600 hover:bg-gray-50 rounded transition-colors"
+                        className={`p-2 rounded transition-colors ${
+                          darkMode
+                            ? 'text-gray-400 hover:bg-navy-600'
+                            : 'text-gray-600 hover:bg-gray-50'
+                        }`}
                       >
                         <X size={16} />
                       </button>
                     </div>
                   ) : (
                     <>
-                      <span className="text-gray-700">{skill.skill}</span>
+                      <span className={darkMode ? 'text-gray-300' : 'text-gray-700'}>{skill.skill}</span>
                       <div className="flex gap-2">
                         <button
                           onClick={() => setEditingId(skill.id)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                          className={`p-2 rounded transition-colors ${
+                            darkMode
+                              ? 'text-blue-400 hover:bg-blue-900/30'
+                              : 'text-blue-600 hover:bg-blue-50'
+                          }`}
                         >
                           <Edit2 size={16} />
                         </button>
                         <button
                           onClick={() => setDeleteId(skill.id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
+                          className={`p-2 rounded transition-colors ${
+                            darkMode
+                              ? 'text-red-400 hover:bg-red-900/30'
+                              : 'text-red-600 hover:bg-red-50'
+                          }`}
                         >
                           <Trash2 size={16} />
                         </button>

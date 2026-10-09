@@ -361,14 +361,14 @@ export default function AdminDashboard({ darkMode = true, setDarkMode }: AdminDa
             )}
 
             {/* Content Managers */}
-            {activeTab === 'profile'    && <ProfileManager    onUpdate={fetchDashboardData} onToast={showToast} />}
-            {activeTab === 'skills'     && <SkillsManager     onUpdate={fetchDashboardData} onToast={showToast} />}
-            {activeTab === 'experience' && <ExperienceManager onUpdate={fetchDashboardData} onToast={showToast} />}
-            {activeTab === 'projects'   && <ProjectsManager   onUpdate={fetchDashboardData} onToast={showToast} />}
-            {activeTab === 'education'  && <EducationManager  onUpdate={fetchDashboardData} onToast={showToast} />}
-            {activeTab === 'resume'     && <ResumeManager     onUpdate={fetchDashboardData} onToast={showToast} />}
-            {activeTab === 'messages'   && <MessagesManager   onUpdate={fetchDashboardData} onToast={showToast} />}
-            {activeTab === 'database'   && <DatabaseManager   onToast={showToast} />}
+            {activeTab === 'profile'    && <ProfileManager    onUpdate={fetchDashboardData} onToast={showToast} darkMode={darkMode} />}
+            {activeTab === 'skills'     && <SkillsManager     onUpdate={fetchDashboardData} onToast={showToast} darkMode={darkMode} />}
+            {activeTab === 'experience' && <ExperienceManager onUpdate={fetchDashboardData} onToast={showToast} darkMode={darkMode} />}
+            {activeTab === 'projects'   && <ProjectsManager   onUpdate={fetchDashboardData} onToast={showToast} darkMode={darkMode} />}
+            {activeTab === 'education'  && <EducationManager  onUpdate={fetchDashboardData} onToast={showToast} darkMode={darkMode} />}
+            {activeTab === 'resume'     && <ResumeManager     onUpdate={fetchDashboardData} onToast={showToast} darkMode={darkMode} />}
+            {activeTab === 'messages'   && <MessagesManager   onUpdate={fetchDashboardData} onToast={showToast} darkMode={darkMode} />}
+            {activeTab === 'database'   && <DatabaseManager   onToast={showToast} darkMode={darkMode} />}
           </div>
         </main>
       </div>
