@@ -1,13 +1,12 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion'
+import { AlertTriangle } from 'lucide-react'
 
 interface ConfirmationModalProps {
-  isOpen: boolean;
-  title: string;
-  message: string;
-  onConfirm: () => void;
-  onCancel: () => void;
+  isOpen: boolean
+  title: string
+  message: string
+  onConfirm: () => void
+  onCancel: () => void
 }
 
 export default function ConfirmationModal({
@@ -20,32 +19,56 @@ export default function ConfirmationModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+        >
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onCancel}
-            className="fixed inset-0 bg-navy-950/60 backdrop-blur-sm"
+            className="fixed inset-0 backdrop-blur-sm"
+            style={{ background: 'var(--bg-overlay)' }}
           />
 
-          {/* Modal Container */}
+          {/* Modal */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            initial={{ opacity: 0, scale: 0.94, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white p-6 shadow-2xl border border-gray-100"
+            exit={{ opacity: 0, scale: 0.94, y: 12 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 380 }}
+            className="relative w-full max-w-sm overflow-hidden"
+            style={{
+              background: 'var(--bg-panel)',
+              border: '1px solid var(--border-line)',
+              borderRadius: 'var(--radius-lg)',
+              boxShadow: 'var(--shadow-xl)',
+              padding: '24px',
+            }}
           >
             <div className="flex items-start gap-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600">
+              <div
+                className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
+                style={{ background: 'var(--color-error-bg)', color: 'var(--color-error)' }}
+              >
                 <AlertTriangle size={20} />
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-bold text-navy-900 font-heading">
+                <h3
+                  id="modal-title"
+                  className="text-base font-bold font-heading"
+                  style={{ color: 'var(--ink-100)' }}
+                >
                   {title}
                 </h3>
-                <p className="mt-2 text-sm text-gray-500 leading-relaxed">
+                <p
+                  className="mt-2 text-sm leading-relaxed"
+                  style={{ color: 'var(--ink-500)' }}
+                >
                   {message}
                 </p>
               </div>
@@ -55,14 +78,22 @@ export default function ConfirmationModal({
               <button
                 type="button"
                 onClick={onCancel}
-                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                className="btn-ghost px-4 py-2 text-sm font-semibold"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={onConfirm}
-                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 transition-colors"
+                className="px-4 py-2 text-sm font-semibold rounded-lg transition-all"
+                style={{
+                  background: 'var(--color-error)',
+                  color: '#ffffff',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.85')}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
               >
                 Delete
               </button>
@@ -71,5 +102,5 @@ export default function ConfirmationModal({
         </div>
       )}
     </AnimatePresence>
-  );
+  )
 }

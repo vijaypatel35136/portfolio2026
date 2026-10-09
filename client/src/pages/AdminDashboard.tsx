@@ -1,69 +1,114 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { 
-  LayoutDashboard, 
-  User, 
-  Code, 
-  Briefcase, 
-  FolderOpen, 
-  GraduationCap, 
-  MessageSquare, 
-  LogOut, 
+import {
+  LayoutDashboard,
+  User,
+  Code,
+  Briefcase,
+  FolderOpen,
+  GraduationCap,
+  MessageSquare,
+  LogOut,
   Eye,
   FileText,
   Database,
-  Menu,
-  X
 } from 'lucide-react'
 import { isAdminAuthenticated, logoutAdmin } from '../services/authService'
-import { getProjects } from '../services/projectService'
+import { getProjects }       from '../services/projectService'
 import { getContactMessages } from '../services/contactService'
-import { getExperiences } from '../services/experienceService'
-import { getSkills } from '../services/skillService'
-import ProfileManager from '../components/admin/ProfileManager'
-import SkillsManager from '../components/admin/SkillsManager'
+import { getExperiences }    from '../services/experienceService'
+import { getSkills }         from '../services/skillService'
+import ProfileManager    from '../components/admin/ProfileManager'
+import SkillsManager     from '../components/admin/SkillsManager'
 import ExperienceManager from '../components/admin/ExperienceManager'
-import ProjectsManager from '../components/admin/ProjectsManager'
-import EducationManager from '../components/admin/EducationManager'
-import MessagesManager from '../components/admin/MessagesManager'
-import ResumeManager from '../components/admin/ResumeManager'
-import DatabaseManager from '../components/admin/DatabaseManager'
-import { ToastContainer } from '../components/Toast'
+import ProjectsManager   from '../components/admin/ProjectsManager'
+import EducationManager  from '../components/admin/EducationManager'
+import MessagesManager   from '../components/admin/MessagesManager'
+import ResumeManager     from '../components/admin/ResumeManager'
+import DatabaseManager   from '../components/admin/DatabaseManager'
+import { ToastContainer }    from '../components/Toast'
 
 interface DashboardStats {
-  totalProjects: number
-  totalMessages: number
-  unreadMessages: number
+  totalProjects:   number
+  totalMessages:   number
+  unreadMessages:  number
   totalExperience: number
-  totalSkills: number
+  totalSkills:     number
 }
+
+const sidebarItems = [
+  { id: 'dashboard',  label: 'Dashboard',  icon: LayoutDashboard },
+  { id: 'profile',    label: 'Profile',    icon: User            },
+  { id: 'skills',     label: 'Skills',     icon: Code            },
+  { id: 'experience', label: 'Experience', icon: Briefcase       },
+  { id: 'projects',   label: 'Projects',   icon: FolderOpen      },
+  { id: 'education',  label: 'Education',  icon: GraduationCap   },
+  { id: 'resume',     label: 'Resume',     icon: FileText        },
+  { id: 'messages',   label: 'Messages',   icon: MessageSquare   },
+  { id: 'database',   label: 'Database',   icon: Database        },
+]
+
+const quickActions = [
+  { id: 'projects',   label: 'Add Project',     icon: FolderOpen    },
+  { id: 'experience', label: 'Add Experience',  icon: Briefcase     },
+  { id: 'messages',   label: 'View Messages',   icon: MessageSquare },
+  { id: 'profile',    label: 'Update Profile',  icon: User          },
+]
+
+const statCards = (stats: DashboardStats, nav: (id: string) => void) => [
+  {
+    label:   'Total Projects',
+    value:   stats.totalProjects,
+    icon:    FolderOpen,
+    iconBg:  'rgba(13,148,136,0.12)',
+    iconClr: 'var(--teal-500)',
+    badge:   null as null | string,
+    onClick: () => nav('projects'),
+  },
+  {
+    label:   'Total Messages',
+    value:   stats.totalMessages,
+    icon:    MessageSquare,
+    iconBg:  'rgba(96,165,250,0.12)',
+    iconClr: 'var(--color-info)',
+    badge:   stats.unreadMessages > 0 ? `${stats.unreadMessages} new` : null,
+    onClick: () => nav('messages'),
+  },
+  {
+    label:   'Experience Entries',
+    value:   stats.totalExperience,
+    icon:    Briefcase,
+    iconBg:  'rgba(16,185,129,0.12)',
+    iconClr: 'var(--color-success)',
+    badge:   null,
+    onClick: () => nav('experience'),
+  },
+  {
+    label:   'Skills Listed',
+    value:   stats.totalSkills,
+    icon:    Code,
+    iconBg:  'rgba(139,92,246,0.12)',
+    iconClr: '#8b5cf6',
+    badge:   null,
+    onClick: () => nav('skills'),
+  },
+]
 
 export default function AdminDashboard() {
   const navigate = useNavigate()
   const [stats, setStats] = useState<DashboardStats>({
-    totalProjects: 0,
-    totalMessages: 0,
-    unreadMessages: 0,
-    totalExperience: 0,
-    totalSkills: 0
+    totalProjects: 0, totalMessages: 0, unreadMessages: 0, totalExperience: 0, totalSkills: 0,
   })
   const [activeTab, setActiveTab] = useState('dashboard')
   const [toasts, setToasts] = useState<Array<{ id: string; message: string; type: 'success' | 'error' }>>([])
 
-  const showToast = (message: string, type: 'success' | 'error') => {
-    const id = Date.now().toString()
-    setToasts(prev => [...prev, { id, message, type }])
-  }
-
-  const removeToast = (id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id))
-  }
+  const showToast  = (message: string, type: 'success' | 'error') =>
+    setToasts(prev => [...prev, { id: Date.now().toString(), message, type }])
+  const removeToast = (id: string) =>
+    setToasts(prev => prev.filter(t => t.id !== id))
 
   useEffect(() => {
-    if (!isAdminAuthenticated()) {
-      navigate('/vijay_dev')
-      return
-    }
+    if (!isAdminAuthenticated()) { navigate('/vijay_dev'); return }
     fetchDashboardData()
   }, [navigate, activeTab])
 
@@ -73,218 +118,215 @@ export default function AdminDashboard() {
         getProjects().catch(() => []),
         getContactMessages().catch(() => []),
         getExperiences().catch(() => []),
-        getSkills().catch(() => [])
+        getSkills().catch(() => []),
       ])
       setStats({
-        totalProjects: projects.length,
-        totalMessages: messages.length,
-        unreadMessages: messages.filter(m => !m.is_read).length,
+        totalProjects:   projects.length,
+        totalMessages:   messages.length,
+        unreadMessages:  messages.filter((m: { is_read: boolean }) => !m.is_read).length,
         totalExperience: experiences.length,
-        totalSkills: skills.length
+        totalSkills:     skills.length,
       })
-    } catch {
-      // Fallback
-    }
+    } catch { /* ignore */ }
   }
 
-  const handleLogout = () => {
-    logoutAdmin()
-    navigate('/vijay_dev')
-  }
-
-  const sidebarItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'profile', label: 'Profile', icon: User },
-    { id: 'skills', label: 'Skills', icon: Code },
-    { id: 'experience', label: 'Experience', icon: Briefcase },
-    { id: 'projects', label: 'Projects', icon: FolderOpen },
-    { id: 'education', label: 'Education', icon: GraduationCap },
-    { id: 'resume', label: 'Resume', icon: FileText },
-    { id: 'messages', label: 'Messages', icon: MessageSquare },
-    { id: 'database', label: 'Database', icon: Database },
-  ]
+  const handleLogout = () => { logoutAdmin(); navigate('/vijay_dev') }
+  const currentLabel = sidebarItems.find(i => i.id === activeTab)?.label ?? 'Dashboard'
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <aside className="w-64 bg-navy-800 text-white flex flex-col fixed h-full">
-        <div className="p-6 border-b border-navy-700">
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 bg-teal-500 rounded-full" />
-            <span className="font-heading text-xl font-bold">Vijay.</span>
+    <div
+      className="min-h-screen flex"
+      style={{ background: 'var(--bg-void)', color: 'var(--ink-100)' }}
+    >
+      {/* ═══════════════════════ SIDEBAR ═══════════════════════ */}
+      <aside
+        className="admin-sidebar w-64 flex flex-col fixed h-full z-40"
+        aria-label="Admin navigation"
+      >
+        {/* Brand */}
+        <div className="p-6 flex items-center gap-2.5" style={{ borderBottom: '1px solid var(--border-line)' }}>
+          <span
+            className="w-2.5 h-2.5 rounded-full"
+            style={{ background: 'var(--teal-500)', boxShadow: '0 0 8px var(--teal-500)' }}
+          />
+          <div>
+            <span className="font-heading text-lg font-bold" style={{ color: 'var(--ink-100)' }}>
+              Vijay.
+            </span>
+            <p className="mono text-xs mt-0.5" style={{ color: 'var(--ink-700)' }}>
+              Admin Panel
+            </p>
           </div>
-          <p className="mono text-gray-500 text-sm mt-1">Admin Panel</p>
         </div>
 
-        <nav className="flex-1 p-4 overflow-y-auto">
-          <ul className="space-y-1">
-            {sidebarItems.map((item) => {
-              const Icon = item.icon
-              return (
-                <li key={item.id}>
-                  <button
-                    onClick={() => setActiveTab(item.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                      activeTab === item.id 
-                        ? 'bg-teal-500/20 text-teal-400' 
-                        : 'text-gray-400 hover:text-white hover:bg-navy-700'
-                    }`}
-                  >
-                    <Icon size={20} />
-                    <span>{item.label}</span>
-                    {item.id === 'messages' && stats.unreadMessages > 0 && (
-                      <span className="ml-auto bg-teal-500 text-white text-xs px-2 py-0.5 rounded-full">
-                        {stats.unreadMessages}
-                      </span>
-                    )}
-                  </button>
-                </li>
-              )
-            })}
+        {/* Nav Items */}
+        <nav className="flex-1 p-3 overflow-y-auto" aria-label="Sidebar navigation">
+          <ul className="space-y-0.5">
+            {sidebarItems.map(({ id, label, icon: Icon }) => (
+              <li key={id}>
+                <button
+                  onClick={() => setActiveTab(id)}
+                  className={`admin-nav-item ${activeTab === id ? 'active' : ''}`}
+                  aria-current={activeTab === id ? 'page' : undefined}
+                >
+                  <Icon size={18} />
+                  <span>{label}</span>
+                  {id === 'messages' && stats.unreadMessages > 0 && (
+                    <span
+                      className="ml-auto text-xs px-2 py-0.5 rounded-full font-medium"
+                      style={{
+                        background: 'var(--teal-500)',
+                        color: 'var(--ink-on-primary)',
+                      }}
+                    >
+                      {stats.unreadMessages}
+                    </span>
+                  )}
+                </button>
+              </li>
+            ))}
           </ul>
         </nav>
 
-        <div className="p-4 border-t border-navy-700">
+        {/* Logout */}
+        <div className="p-3" style={{ borderTop: '1px solid var(--border-line)' }}>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-red-400 hover:bg-navy-700 rounded-lg transition-colors"
+            className="admin-nav-item"
+            style={{ color: 'var(--ink-500)' }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--danger-400)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--ink-500)')}
           >
-            <LogOut size={20} />
+            <LogOut size={18} />
             <span>Logout</span>
           </button>
         </div>
       </aside>
 
-      {/* Main content */}
-      <main className="flex-1 ml-64 p-8 overflow-auto">
-        <div className="max-w-7xl mx-auto">
+      {/* ═══════════════════════ MAIN ═══════════════════════ */}
+      <main className="flex-1 ml-64 p-8 overflow-auto min-h-screen">
+        <div className="max-w-6xl mx-auto">
+
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-8 gap-4">
             <div>
-              <h1 className="font-heading text-3xl font-bold text-navy-800">
-                {sidebarItems.find(item => item.id === activeTab)?.label}
+              <h1
+                className="font-heading text-2xl font-bold"
+                style={{ color: 'var(--ink-100)' }}
+              >
+                {currentLabel}
               </h1>
-              <p className="text-gray-500 mt-1">Manage your portfolio content</p>
+              <p className="text-sm mt-1" style={{ color: 'var(--ink-500)' }}>
+                Manage your portfolio content
+              </p>
             </div>
-            <div className="flex items-center gap-3">
-              {activeTab === 'dashboard' && (
-                <Link
-                  to="/"
-                  target="_blank"
-                  className="px-4 py-2 bg-navy-800 text-white rounded-lg hover:bg-navy-700 transition-colors flex items-center gap-2"
-                >
-                  <Eye size={18} />
-                  View Site
-                </Link>
-              )}
-            </div>
+            {activeTab === 'dashboard' && (
+              <Link
+                to="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-ghost flex items-center gap-2 px-4 py-2 text-sm"
+              >
+                <Eye size={16} />
+                View Site
+              </Link>
+            )}
           </div>
 
-          {/* Dashboard View */}
+          {/* ── Dashboard Overview ── */}
           {activeTab === 'dashboard' && (
             <>
               {/* Stats Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div
-                  onClick={() => setActiveTab('projects')}
-                  className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm cursor-pointer hover:border-teal-400 hover:shadow-md transition-all duration-200 group"
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center group-hover:bg-teal-200 transition-colors">
-                      <FolderOpen className="w-6 h-6 text-teal-600" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                {statCards(stats, setActiveTab).map(({ label, value, icon: Icon, iconBg, iconClr, badge, onClick }) => (
+                  <button
+                    key={label}
+                    onClick={onClick}
+                    className="admin-card p-6 text-left group cursor-pointer"
+                    style={{ borderRadius: 'var(--radius-lg)' }}
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div
+                        className="admin-stat-icon"
+                        style={{ background: iconBg }}
+                      >
+                        <Icon size={20} style={{ color: iconClr }} />
+                      </div>
+                      {badge && (
+                        <span
+                          className="text-xs px-2 py-0.5 rounded-full font-medium"
+                          style={{ background: 'var(--color-info-bg)', color: 'var(--color-info)' }}
+                        >
+                          {badge}
+                        </span>
+                      )}
                     </div>
-                    <span className="text-xs text-teal-600 opacity-0 group-hover:opacity-100 transition-opacity">View →</span>
-                  </div>
-                  <p className="text-3xl font-bold text-navy-800">{stats.totalProjects}</p>
-                  <p className="text-gray-500">Total Projects</p>
-                </div>
-
-                <div
-                  onClick={() => setActiveTab('messages')}
-                  className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm cursor-pointer hover:border-blue-400 hover:shadow-md transition-all duration-200 group"
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                      <MessageSquare className="w-6 h-6 text-blue-600" />
-                    </div>
-                    {stats.unreadMessages > 0 && (
-                      <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                        {stats.unreadMessages} new
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-3xl font-bold text-navy-800">{stats.totalMessages}</p>
-                  <p className="text-gray-500">Total Messages</p>
-                </div>
-
-                <div
-                  onClick={() => setActiveTab('experience')}
-                  className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm cursor-pointer hover:border-green-400 hover:shadow-md transition-all duration-200 group"
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
-                      <Briefcase className="w-6 h-6 text-green-600" />
-                    </div>
-                    <span className="text-xs text-green-600 opacity-0 group-hover:opacity-100 transition-opacity">View →</span>
-                  </div>
-                  <p className="text-3xl font-bold text-navy-800">{stats.totalExperience}</p>
-                  <p className="text-gray-500">Experience Entries</p>
-                </div>
-
-                <div
-                  onClick={() => setActiveTab('skills')}
-                  className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm cursor-pointer hover:border-purple-400 hover:shadow-md transition-all duration-200 group"
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-                      <Code className="w-6 h-6 text-purple-600" />
-                    </div>
-                    <span className="text-xs text-purple-600 opacity-0 group-hover:opacity-100 transition-opacity">View →</span>
-                  </div>
-                  <p className="text-3xl font-bold text-navy-800">{stats.totalSkills}</p>
-                  <p className="text-gray-500">Skills Listed</p>
-                </div>
+                    <p
+                      className="text-3xl font-bold font-heading mb-1"
+                      style={{ color: 'var(--ink-100)' }}
+                    >
+                      {value}
+                    </p>
+                    <p className="text-sm font-medium" style={{ color: 'var(--ink-500)' }}>
+                      {label}
+                    </p>
+                  </button>
+                ))}
               </div>
 
               {/* Quick Actions */}
-              <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <h2 className="font-heading text-lg font-semibold text-navy-800 mb-4">Quick Actions</h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {[
-                    { id: 'projects', label: 'Add Project', icon: FolderOpen },
-                    { id: 'experience', label: 'Add Experience', icon: Briefcase },
-                    { id: 'messages', label: 'View Messages', icon: MessageSquare },
-                    { id: 'profile', label: 'Update Profile', icon: User }
-                  ].map((action) => {
-                    const Icon = action.icon
-                    return (
-                      <button 
-                        key={action.id}
-                        onClick={() => setActiveTab(action.id)}
-                        className="flex flex-col items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                      >
-                        <Icon className="w-8 h-8 text-teal-600" />
-                        <span className="text-navy-800 text-sm font-medium">{action.label}</span>
-                      </button>
-                    )
-                  })}
+              <div className="admin-card p-6" style={{ borderRadius: 'var(--radius-lg)' }}>
+                <h2
+                  className="font-heading text-base font-semibold mb-5"
+                  style={{ color: 'var(--ink-100)' }}
+                >
+                  Quick Actions
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {quickActions.map(({ id, label, icon: Icon }) => (
+                    <button
+                      key={id}
+                      onClick={() => setActiveTab(id)}
+                      className="flex flex-col items-center gap-3 p-5 rounded-xl transition-all text-center"
+                      style={{
+                        background: 'var(--bg-panel-2)',
+                        border: '1px solid var(--border-line)',
+                        color: 'var(--ink-300)',
+                      }}
+                      onMouseEnter={(e) => {
+                        const el = e.currentTarget
+                        el.style.borderColor = 'var(--teal-500)'
+                        el.style.background  = 'var(--teal-100)'
+                        el.style.color       = 'var(--teal-500)'
+                      }}
+                      onMouseLeave={(e) => {
+                        const el = e.currentTarget
+                        el.style.borderColor = 'var(--border-line)'
+                        el.style.background  = 'var(--bg-panel-2)'
+                        el.style.color       = 'var(--ink-300)'
+                      }}
+                    >
+                      <Icon size={22} />
+                      <span className="text-sm font-medium">{label}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
             </>
           )}
 
           {/* Content Managers */}
-          {activeTab === 'profile' && <ProfileManager onUpdate={fetchDashboardData} onToast={showToast} />}
-          {activeTab === 'skills' && <SkillsManager onUpdate={fetchDashboardData} onToast={showToast} />}
+          {activeTab === 'profile'    && <ProfileManager    onUpdate={fetchDashboardData} onToast={showToast} />}
+          {activeTab === 'skills'     && <SkillsManager     onUpdate={fetchDashboardData} onToast={showToast} />}
           {activeTab === 'experience' && <ExperienceManager onUpdate={fetchDashboardData} onToast={showToast} />}
-          {activeTab === 'projects' && <ProjectsManager onUpdate={fetchDashboardData} onToast={showToast} />}
-          {activeTab === 'education' && <EducationManager onUpdate={fetchDashboardData} onToast={showToast} />}
-          {activeTab === 'resume' && <ResumeManager onUpdate={fetchDashboardData} onToast={showToast} />}
-          {activeTab === 'messages' && <MessagesManager onUpdate={fetchDashboardData} onToast={showToast} />}
-          {activeTab === 'database' && <DatabaseManager onToast={showToast} />}
+          {activeTab === 'projects'   && <ProjectsManager   onUpdate={fetchDashboardData} onToast={showToast} />}
+          {activeTab === 'education'  && <EducationManager  onUpdate={fetchDashboardData} onToast={showToast} />}
+          {activeTab === 'resume'     && <ResumeManager     onUpdate={fetchDashboardData} onToast={showToast} />}
+          {activeTab === 'messages'   && <MessagesManager   onUpdate={fetchDashboardData} onToast={showToast} />}
+          {activeTab === 'database'   && <DatabaseManager   onToast={showToast} />}
         </div>
       </main>
-      
+
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   )

@@ -20,7 +20,7 @@ export function AppRoutes({ darkMode, setDarkMode }: AppRoutesProps) {
           <>
             <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
             <ScrollDots darkMode={darkMode} />
-            <Home darkMode={darkMode} />
+            <Home darkMode={darkMode} setDarkMode={setDarkMode} />
           </>
         }
       />

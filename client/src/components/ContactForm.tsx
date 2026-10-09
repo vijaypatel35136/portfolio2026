@@ -1,21 +1,17 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Send, CheckCircle, XCircle } from 'lucide-react'
+import { Send, CheckCircle, XCircle, Loader2 } from 'lucide-react'
 import { submitContactMessage } from '../services/contactService'
 
 interface ContactFormProps {
   darkMode?: boolean
 }
 
-export default function ContactForm({ darkMode = true }: ContactFormProps) {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: '',
-  })
-  const [loading, setLoading] = useState(false)
-  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle')
-  const [errorMessage, setErrorMessage] = useState('')
+export default function ContactForm({ darkMode: _darkMode = true }: ContactFormProps) {
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' })
+  const [loading,  setLoading]  = useState(false)
+  const [status,   setStatus]   = useState<'idle' | 'success' | 'error'>('idle')
+  const [errorMsg, setErrorMsg] = useState('')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -25,20 +21,16 @@ export default function ContactForm({ darkMode = true }: ContactFormProps) {
     e.preventDefault()
     setLoading(true)
     setStatus('idle')
-    setErrorMessage('')
+    setErrorMsg('')
 
     try {
-      await submitContactMessage({
-        name: formData.name,
-        email: formData.email,
-        message: formData.message,
-      })
+      await submitContactMessage(formData)
       setStatus('success')
       setFormData({ name: '', email: '', message: '' })
       setTimeout(() => setStatus('idle'), 5000)
     } catch (err) {
       setStatus('error')
-      setErrorMessage(
+      setErrorMsg(
         err instanceof Error
           ? err.message
           : 'Failed to save your message. Please try again.',
@@ -53,36 +45,28 @@ export default function ContactForm({ darkMode = true }: ContactFormProps) {
       initial={{ opacity: 0, x: 20 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
-      className={`p-6 rounded-xl relative ${
-        darkMode
-          ? 'stats-card'
-          : 'bg-white border border-gray-200 shadow-sm'
-      }`}
+      transition={{ duration: 0.5 }}
+      className="contact-form-panel p-6"
       onSubmit={handleSubmit}
+      noValidate
     >
+      {/* ── Status Alerts ── */}
       <AnimatePresence>
         {status === 'success' && (
           <motion.div
             key="success"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className={`mb-4 p-4 border rounded-lg flex items-start gap-3 ${
-              darkMode
-                ? 'bg-teal-500/20 border-teal-500'
-                : 'bg-green-50 border-green-500'
-            }`}
+            initial={{ opacity: 0, y: -10, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: -10, height: 0 }}
+            transition={{ duration: 0.25 }}
+            className="contact-success-alert flex items-start gap-3 p-4 mb-5 overflow-hidden"
           >
-            <CheckCircle className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
-              darkMode ? 'text-teal-400' : 'text-green-600'
-            }`} />
+            <CheckCircle size={18} className="flex-shrink-0 mt-0.5" style={{ color: 'var(--color-success)' }} />
             <div>
-              <p className={`font-semibold ${
-                darkMode ? 'text-teal-400' : 'text-green-700'
-              }`}>Message sent successfully!</p>
-              <p className={`text-sm mt-1 ${
-                darkMode ? 'text-teal-300' : 'text-green-600'
-              }`}>
+              <p className="font-semibold text-sm" style={{ color: 'var(--color-success)' }}>
+                Message sent successfully!
+              </p>
+              <p className="text-sm mt-0.5" style={{ color: 'var(--color-success)', opacity: 0.8 }}>
                 Thanks for reaching out. I'll get back to you within 24 hours.
               </p>
             </div>
@@ -92,103 +76,93 @@ export default function ContactForm({ darkMode = true }: ContactFormProps) {
         {status === 'error' && (
           <motion.div
             key="error"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className={`mb-4 p-4 border rounded-lg flex items-start gap-3 ${
-              darkMode
-                ? 'bg-red-500/20 border-red-500'
-                : 'bg-red-50 border-red-500'
-            }`}
+            initial={{ opacity: 0, y: -10, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: -10, height: 0 }}
+            transition={{ duration: 0.25 }}
+            className="contact-error-alert flex items-start gap-3 p-4 mb-5 overflow-hidden"
           >
-            <XCircle className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
-              darkMode ? 'text-red-400' : 'text-red-600'
-            }`} />
+            <XCircle size={18} className="flex-shrink-0 mt-0.5" style={{ color: 'var(--color-error)' }} />
             <div>
-              <p className={`font-semibold ${
-                darkMode ? 'text-red-400' : 'text-red-700'
-              }`}>Failed to send message</p>
-              <p className={`text-sm mt-1 ${
-                darkMode ? 'text-red-300' : 'text-red-600'
-              }`}>{errorMessage}</p>
+              <p className="font-semibold text-sm" style={{ color: 'var(--color-error)' }}>
+                Failed to send message
+              </p>
+              <p className="text-sm mt-0.5" style={{ color: 'var(--color-error)', opacity: 0.8 }}>
+                {errorMsg}
+              </p>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
       <div className="space-y-5">
+        {/* Name */}
         <div>
-          <label className={`block text-sm mb-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>NAME</label>
+          <label className="field-label block mb-2" htmlFor="cf-name">Name</label>
           <input
+            id="cf-name"
             type="text"
             name="name"
             value={formData.name}
             onChange={handleChange}
             placeholder="Your name"
-            className={`w-full px-4 py-3 border rounded-lg focus:border-teal-500 transition-colors ${
-              darkMode
-                ? 'bg-navy-700 border-navy-600 text-gray-100 placeholder-gray-500'
-                : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
-            }`}
+            className="field px-4 py-3"
             required
+            autoComplete="name"
           />
         </div>
 
+        {/* Email */}
         <div>
-          <label className={`block text-sm mb-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>EMAIL</label>
+          <label className="field-label block mb-2" htmlFor="cf-email">Email</label>
           <input
+            id="cf-email"
             type="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
             placeholder="your@email.com"
-            className={`w-full px-4 py-3 border rounded-lg focus:border-teal-500 transition-colors ${
-              darkMode
-                ? 'bg-navy-700 border-navy-600 text-gray-100 placeholder-gray-500'
-                : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
-            }`}
+            className="field px-4 py-3"
             required
+            autoComplete="email"
           />
         </div>
 
+        {/* Message */}
         <div>
-          <label className={`block text-sm mb-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>MESSAGE</label>
+          <label className="field-label block mb-2" htmlFor="cf-message">Message</label>
           <textarea
+            id="cf-message"
             name="message"
             value={formData.message}
             onChange={handleChange}
             rows={5}
             placeholder="Tell me about your project..."
-            className={`w-full px-4 py-3 border rounded-lg focus:border-teal-500 transition-colors resize-none ${
-              darkMode
-                ? 'bg-navy-700 border-navy-600 text-gray-100 placeholder-gray-500'
-                : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'
-            }`}
+            className="field px-4 py-3 resize-none"
             required
           />
         </div>
 
-        <button
+        {/* Submit */}
+        <motion.button
           type="submit"
           disabled={loading}
-          className={`w-full py-3 px-6 font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-            darkMode
-              ? 'bg-teal-600 hover:bg-teal-700 text-white'
-              : 'bg-teal-500 hover:bg-teal-600 text-white'
-          }`}
+          whileHover={{ scale: loading ? 1 : 1.02 }}
+          whileTap={{ scale: loading ? 1 : 0.98 }}
+          className="btn-primary cta-glow w-full py-3.5 px-6 flex items-center justify-center gap-2"
         >
           {loading ? (
             <>
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Sending...
+              <Loader2 size={18} className="animate-spin" />
+              <span>Sending…</span>
             </>
           ) : (
             <>
-              <Send size={18} />
-              Send Message
+              <Send size={17} />
+              <span>Send Message</span>
             </>
           )}
-        </button>
+        </motion.button>
       </div>
     </motion.form>
   )

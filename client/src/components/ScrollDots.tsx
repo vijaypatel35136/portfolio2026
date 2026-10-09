@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
 
 const sections = [
-  { id: 'hero', label: '01' },
-  { id: 'about', label: '02' },
-  { id: 'skills', label: '03' },
+  { id: 'hero',       label: '01' },
+  { id: 'about',      label: '02' },
+  { id: 'skills',     label: '03' },
   { id: 'experience', label: '04' },
-  { id: 'projects', label: '05' },
-  { id: 'education', label: '06' },
-  { id: 'contact', label: '07' },
+  { id: 'projects',   label: '05' },
+  { id: 'education',  label: '06' },
+  { id: 'contact',    label: '07' },
 ]
 
 interface ScrollDotsProps {
@@ -17,31 +17,44 @@ interface ScrollDotsProps {
 export default function ScrollDots({ darkMode = true }: ScrollDotsProps) {
   const [activeSection, setActiveSection] = useState('hero')
 
+  /* ── Scroll position handler for side dots ── */
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id)
-            // Dispatch custom event for other components to listen
-            window.dispatchEvent(new CustomEvent('sectionChange', { detail: entry.target.id }))
-          }
-        })
-      },
-      { 
-        threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5],
-        rootMargin: '-10% 0px -60% 0px'
+    const handleScroll = () => {
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 60) {
+        setActiveSection('contact')
+        return
       }
-    )
 
-    sections.forEach((section) => {
-      const element = document.getElementById(section.id)
-      if (element) {
-        observer.observe(element)
+      const scrollPosition = window.scrollY + 200
+      const sectionIds = ['hero', 'about', 'skills', 'experience', 'projects', 'education', 'contact']
+
+      let current = 'hero'
+      for (const id of sectionIds) {
+        const el = document.getElementById(id)
+        if (el && scrollPosition >= el.offsetTop) {
+          current = id
+        }
       }
-    })
 
-    return () => observer.disconnect()
+      setActiveSection(current)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll()
+
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  /* ── Listen for manual sectionChange custom events ── */
+  useEffect(() => {
+    const handleSectionChange = (event: CustomEvent) => {
+      if (event.detail) {
+        setActiveSection(event.detail)
+      }
+    }
+
+    window.addEventListener('sectionChange', handleSectionChange as EventListener)
+    return () => window.removeEventListener('sectionChange', handleSectionChange as EventListener)
   }, [])
 
   const scrollToSection = (id: string) => {

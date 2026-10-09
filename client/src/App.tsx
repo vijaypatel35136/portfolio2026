@@ -2,29 +2,51 @@ import { useState, useEffect } from 'react'
 import AppRoutes from './routes/AppRoutes'
 
 function App() {
-  const [darkMode, setDarkMode] = useState(() => {
-    // Check localStorage or system preference
-    const saved = localStorage.getItem('theme')
-    if (saved) return saved === 'dark'
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('theme')
+      if (saved === 'dark')  return true
+      if (saved === 'light') return false
+    } catch { /* ignore */ }
     return window.matchMedia('(prefers-color-scheme: dark)').matches
   })
 
   useEffect(() => {
+    const html = document.documentElement
     if (darkMode) {
-      document.documentElement.classList.add('dark')
-      localStorage.setItem('theme', 'dark')
+      html.classList.add('dark')
+      html.setAttribute('data-theme', 'dark')
+      html.style.colorScheme = 'dark'
     } else {
-      document.documentElement.classList.remove('dark')
-      localStorage.setItem('theme', 'light')
+      html.classList.remove('dark')
+      html.setAttribute('data-theme', 'light')
+      html.style.colorScheme = 'light'
     }
+    try {
+      localStorage.setItem('theme', darkMode ? 'dark' : 'light')
+    } catch { /* ignore */ }
   }, [darkMode])
 
+  /* Keep in sync with OS preference if no saved preference */
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)')
+    const onChange = (e: MediaQueryListEvent) => {
+      if (!localStorage.getItem('theme')) {
+        setDarkMode(e.matches)
+      }
+    }
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${
-      darkMode
-        ? 'bg-navy-900 text-gray-100'
-        : 'bg-gray-50 text-gray-900'
-    }`}>
+    <div
+      className="min-h-screen transition-colors duration-300"
+      style={{
+        background: 'var(--bg-void)',
+        color: 'var(--ink-100)',
+      }}
+    >
       <AppRoutes darkMode={darkMode} setDarkMode={setDarkMode} />
     </div>
   )

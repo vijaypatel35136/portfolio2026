@@ -10,47 +10,55 @@ interface ToastProps {
 
 export default function Toast({ message, type, onClose }: ToastProps) {
   const [isVisible, setIsVisible] = useState(true)
+  const isSuccess = type === 'success'
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(false)
-      setTimeout(onClose, 300)
-    }, 3000)
-
+      setTimeout(onClose, 350)
+    }, 4000)
     return () => clearTimeout(timer)
   }, [onClose])
+
+  const dismiss = () => {
+    setIsVisible(false)
+    setTimeout(onClose, 350)
+  }
 
   return (
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 0, x: 400, y: 0 }}
-          animate={{ opacity: 1, x: 0, y: 0 }}
-          exit={{ opacity: 0, x: 400, y: 0 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="fixed top-4 right-4 z-50"
+          initial={{ opacity: 0, x: 60, scale: 0.95 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          exit={{ opacity: 0, x: 60, scale: 0.95 }}
+          transition={{ type: 'spring', damping: 28, stiffness: 340 }}
+          role="alert"
+          aria-live="assertive"
+          className="toast flex items-center gap-3 px-5 py-3.5 max-w-sm"
+          style={{
+            borderLeftWidth: 3,
+            borderLeftColor: isSuccess ? 'var(--color-success)' : 'var(--color-error)',
+          }}
         >
-          <div
-            className={`flex items-center gap-3 px-6 py-4 rounded-lg shadow-lg ${
-              type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
-            }`}
+          {isSuccess ? (
+            <CheckCircle size={18} style={{ color: 'var(--color-success)', flexShrink: 0 }} />
+          ) : (
+            <XCircle size={18} style={{ color: 'var(--color-error)', flexShrink: 0 }} />
+          )}
+          <span className="flex-1 text-sm font-medium" style={{ color: 'var(--ink-100)' }}>
+            {message}
+          </span>
+          <button
+            onClick={dismiss}
+            className="ml-1 rounded transition-colors p-0.5"
+            style={{ color: 'var(--ink-500)' }}
+            aria-label="Dismiss notification"
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--ink-100)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--ink-500)')}
           >
-            {type === 'success' ? (
-              <CheckCircle size={20} />
-            ) : (
-              <XCircle size={20} />
-            )}
-            <span className="font-medium">{message}</span>
-            <button
-              onClick={() => {
-                setIsVisible(false)
-                setTimeout(onClose, 300)
-              }}
-              className="ml-2 hover:opacity-80 transition-opacity"
-            >
-              <X size={18} />
-            </button>
-          </div>
+            <X size={15} />
+          </button>
         </motion.div>
       )}
     </AnimatePresence>
@@ -64,7 +72,10 @@ interface ToastContainerProps {
 
 export function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
   return (
-    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
+    <div
+      className="fixed bottom-6 right-5 z-50 flex flex-col gap-2"
+      aria-label="Notifications"
+    >
       {toasts.map((toast) => (
         <Toast
           key={toast.id}

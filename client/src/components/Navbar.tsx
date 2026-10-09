@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Sun, Moon, Menu, X } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
+import ThemeToggle from './ThemeToggle'
 
 interface NavbarProps {
   darkMode: boolean
@@ -8,144 +9,180 @@ interface NavbarProps {
 }
 
 const navLinks = [
-  { name: 'Home', href: '#hero' },
-  { name: 'About', href: '#about' },
-  { name: 'Skills', href: '#skills' },
-  { name: 'Experience', href: '#experience' },
-  { name: 'Projects', href: '#projects' },
-  { name: 'Contact', href: '#contact' },
+  { name: 'Home',       href: '#hero',       id: 'hero' },
+  { name: 'About',      href: '#about',      id: 'about' },
+  { name: 'Skills',     href: '#skills',     id: 'skills' },
+  { name: 'Experience', href: '#experience', id: 'experience' },
+  { name: 'Projects',   href: '#projects',   id: 'projects' },
+  { name: 'Contact',    href: '#contact',    id: 'contact' },
 ]
 
 export default function Navbar({ darkMode, setDarkMode }: NavbarProps) {
-  const [scrolled, setScrolled] = useState(false)
+  const [scrolled,       setScrolled]       = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [activeSection, setActiveSection] = useState('hero')
+  const [activeSection,  setActiveSection]  = useState('hero')
 
+  /* ── Scroll position handler for active section & navbar background ── */
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50)
+      setScrolled(window.scrollY > 40)
+
+      // Check if user is near bottom of the page -> activate contact
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 60) {
+        setActiveSection('contact')
+        return
+      }
+
+      const scrollPosition = window.scrollY + 200
+      const sectionIds = ['hero', 'about', 'skills', 'experience', 'projects', 'education', 'contact']
+
+      let current = 'hero'
+      for (const id of sectionIds) {
+        const el = document.getElementById(id)
+        if (el && scrollPosition >= el.offsetTop) {
+          current = id
+        }
+      }
+
+      setActiveSection(current)
     }
-    window.addEventListener('scroll', handleScroll)
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll()
+
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  /* ── Listen to manual section change events ── */
   useEffect(() => {
     const handleSectionChange = (event: CustomEvent) => {
-      setActiveSection(event.detail)
+      if (event.detail) {
+        setActiveSection(event.detail)
+      }
     }
-
     window.addEventListener('sectionChange', handleSectionChange as EventListener)
     return () => window.removeEventListener('sectionChange', handleSectionChange as EventListener)
   }, [])
 
-  const scrollToSection = (href: string) => {
-    const element = document.querySelector(href)
+  const scrollToSection = (href: string, id: string) => {
+    const targetId = id || href.replace('#', '')
+    const element = document.getElementById(targetId)
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' })
+      setActiveSection(targetId)
+      window.dispatchEvent(new CustomEvent('sectionChange', { detail: targetId }))
     }
     setMobileMenuOpen(false)
   }
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      scrolled
-        ? darkMode
-          ? 'bg-navy-900/95 backdrop-blur-sm py-4'
-          : 'bg-white/95 backdrop-blur-sm py-4'
-        : 'bg-transparent py-6'
-    }`}>
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled ? 'navbar shadow-sm py-3' : 'bg-transparent py-5'
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 group">
-          <span className="w-3 h-3 bg-teal-500 rounded-full group-hover:animate-pulse" />
-          <span className="font-heading text-xl font-bold tracking-tight">Vijay.</span>
+        {/* ── Logo ── */}
+        <Link to="/" className="flex items-center gap-2.5 group" aria-label="Vijay Portfolio Home">
+          <span
+            className="w-2.5 h-2.5 rounded-full transition-all duration-300 group-hover:scale-125"
+            style={{ background: 'var(--teal-500)', boxShadow: '0 0 8px var(--teal-500)' }}
+          />
+          <span
+            className="font-heading text-xl font-bold tracking-tight"
+            style={{ color: 'var(--ink-100)' }}
+          >
+            Vijay.
+          </span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <a
-              key={link.name}
-              href={link.href}
-              onClick={(e) => {
-                e.preventDefault()
-                scrollToSection(link.href)
-              }}
-              className={`text-sm transition-colors duration-200 ${
-                activeSection === link.href.substring(1)
-                  ? 'text-teal-400 font-medium'
-                  : darkMode
-                    ? 'text-gray-400 hover:text-teal-400'
-                    : 'text-gray-600 hover:text-teal-600'
-              }`}
-            >
-              {link.name}
-            </a>
-          ))}
-        </div>
-
-        {/* Right side */}
-        <div className="hidden md:flex items-center gap-4">
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className="p-2 text-gray-400 hover:text-teal-400 transition-colors"
-            aria-label="Toggle theme"
-          >
-            {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
-        </div>
-
-        {/* Mobile menu button */}
-        <button
-          className={`md:hidden p-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        >
-          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-      </div>
-
-      {/* Mobile menu */}
-      {mobileMenuOpen && (
-        <div className={`md:hidden absolute top-full left-0 right-0 border-t ${
-          darkMode ? 'bg-navy-900 border-navy-700' : 'bg-white border-gray-200'
-        }`}>
-          <div className="flex flex-col p-6 gap-4">
-            {navLinks.map((link) => (
+        {/* ── Desktop Navigation Links ── */}
+        <div className="hidden md:flex items-center gap-7">
+          {navLinks.map((link) => {
+            const isActive = activeSection === link.id
+            return (
               <a
                 key={link.name}
                 href={link.href}
                 onClick={(e) => {
                   e.preventDefault()
-                  scrollToSection(link.href)
+                  scrollToSection(link.href, link.id)
                 }}
-                className={`text-lg transition-colors ${
-                  activeSection === link.href.substring(1)
-                    ? 'text-teal-400 font-medium'
-                    : darkMode
-                      ? 'text-gray-300 hover:text-teal-400'
-                      : 'text-gray-700 hover:text-teal-600'
-                }`}
+                className={`navbar-link ${isActive ? 'active' : ''}`}
+                style={{
+                  color: isActive ? 'var(--teal-500)' : 'var(--ink-300)',
+                }}
               >
                 {link.name}
               </a>
-            ))}
-            <div className={`flex items-center gap-4 pt-4 border-t ${
-              darkMode ? 'border-navy-700' : 'border-gray-200'
-            }`}>
-              <button
-                onClick={() => setDarkMode(!darkMode)}
-                className={`p-2 ${darkMode ? 'text-gray-400 hover:text-teal-400' : 'text-gray-600 hover:text-teal-600'}`}
-              >
-                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-              </button>
+            )
+          })}
+        </div>
+
+        {/* ── Desktop Theme Toggle ── */}
+        <div className="hidden md:flex items-center gap-4">
+          <ThemeToggle darkMode={darkMode} setDarkMode={setDarkMode} />
+        </div>
+
+        {/* ── Mobile Controls ── */}
+        <div className="md:hidden flex items-center gap-3">
+          <ThemeToggle darkMode={darkMode} setDarkMode={setDarkMode} />
+          <button
+            className="p-2 rounded-lg transition-colors"
+            style={{ color: 'var(--ink-500)', background: 'var(--bg-panel)' }}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
+      </div>
+
+      {/* ── Mobile Menu Dropdown ── */}
+      {mobileMenuOpen && (
+        <div
+          className="md:hidden border-t"
+          style={{
+            background: 'var(--bg-panel)',
+            borderColor: 'var(--border-line)',
+          }}
+        >
+          <nav className="flex flex-col py-4 px-6 gap-1" aria-label="Mobile navigation">
+            {navLinks.map((link) => {
+              const isActive = activeSection === link.id
+              return (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  className="py-3 px-3 rounded-lg font-medium text-base transition-colors"
+                  style={{
+                    color: isActive ? 'var(--teal-500)' : 'var(--ink-300)',
+                    background: isActive ? 'var(--teal-100)' : 'transparent',
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    scrollToSection(link.href, link.id)
+                  }}
+                >
+                  {link.name}
+                </a>
+              )
+            })}
+            <div
+              className="mt-4 pt-4 flex items-center gap-4"
+              style={{ borderTop: '1px solid var(--border-line)' }}
+            >
               <Link
                 to="/vijay_dev"
-                className={`mono text-sm ${darkMode ? 'text-gray-500 hover:text-teal-400' : 'text-gray-600 hover:text-teal-600'}`}
+                className="mono text-sm transition-colors"
+                style={{ color: 'var(--ink-700)' }}
+                onClick={() => setMobileMenuOpen(false)}
               >
                 /vijay_dev
               </Link>
             </div>
-          </div>
+          </nav>
         </div>
       )}
     </nav>
