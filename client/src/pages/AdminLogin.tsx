@@ -9,12 +9,34 @@ export default function AdminLogin() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [emailError, setEmailError] = useState('')
+  const [passwordError, setPasswordError] = useState('')
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setEmailError('')
+    setPasswordError('')
     setLoading(true)
+
+    // Validate fields
+    let hasError = false
+
+    if (!email) {
+      setEmailError('Username is required')
+      hasError = true
+    }
+
+    if (!password) {
+      setPasswordError('Password is required')
+      hasError = true
+    }
+
+    if (hasError) {
+      setLoading(false)
+      return
+    }
 
     try {
       const success = await loginAdmin(email, password)
@@ -22,6 +44,8 @@ export default function AdminLogin() {
         navigate('/vijay_dev/dashboard')
       } else {
         setError('Invalid credentials. Check your email and password.')
+        setEmailError('Invalid username')
+        setPasswordError('Invalid password')
         setLoading(false)
       }
     } catch {
@@ -85,18 +109,34 @@ export default function AdminLogin() {
 
           <div className="space-y-5">
             <div>
-              <label className="block text-sm text-gray-400 mb-2 font-medium">EMAIL</label>
+              <label className="block text-sm text-gray-400 mb-2 font-medium">Username</label>
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
                 <input
-                  type="email"
-                  placeholder="admin@vijay.dev"
+                  type="text"
+                  placeholder="Enter Your Username"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-navy-700/50 border border-navy-600/50 rounded-xl text-gray-100 placeholder-gray-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all duration-300"
+                  onChange={(e) => {
+                    setEmail(e.target.value)
+                    setEmailError('')
+                  }}
+                  className={`w-full pl-12 pr-4 py-3 bg-navy-700/50 border rounded-xl text-gray-100 placeholder-gray-500 focus:ring-2 transition-all duration-300 ${
+                    emailError
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                      : 'border-navy-600/50 focus:border-teal-500 focus:ring-teal-500/20'
+                  }`}
                   required
                 />
               </div>
+              {emailError && (
+                <motion.p
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-1 text-xs text-red-400"
+                >
+                  {emailError}
+                </motion.p>
+              )}
             </div>
             <div>
               <label className="block text-sm text-gray-400 mb-2 font-medium">PASSWORD</label>
@@ -106,11 +146,27 @@ export default function AdminLogin() {
                   type="password"
                   placeholder="••••••••"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-navy-700/50 border border-navy-600/50 rounded-xl text-gray-100 placeholder-gray-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all duration-300"
+                  onChange={(e) => {
+                    setPassword(e.target.value)
+                    setPasswordError('')
+                  }}
+                  className={`w-full pl-12 pr-4 py-3 bg-navy-700/50 border rounded-xl text-gray-100 placeholder-gray-500 focus:ring-2 transition-all duration-300 ${
+                    passwordError
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                      : 'border-navy-600/50 focus:border-teal-500 focus:ring-teal-500/20'
+                  }`}
                   required
                 />
               </div>
+              {passwordError && (
+                <motion.p
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-1 text-xs text-red-400"
+                >
+                  {passwordError}
+                </motion.p>
+              )}
             </div>
             <motion.button
               type="submit"
