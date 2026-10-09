@@ -46,7 +46,7 @@ export default function ContactForm({ darkMode: _darkMode = true }: ContactFormP
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5 }}
-      className="contact-form-panel p-6"
+      className="contact-form-panel p-4 md:p-6"
       onSubmit={handleSubmit}
       noValidate
     >

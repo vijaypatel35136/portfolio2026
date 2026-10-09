@@ -605,9 +605,9 @@ export default function Home({ darkMode = true, setDarkMode }: HomeProps) {
       <section id="contact">
         <div className="max-w-7xl mx-auto px-6 w-full">
           <ScrollReveal animation="up">
-            <div className="cta-banner p-8 md:p-14">
+            <div className="cta-banner p-4 md:p-14">
               <div className="grid lg:grid-cols-[1fr_1.05fr] gap-12 items-start relative">
-                <div>
+                <div style={{ wordWrap: 'anywhere' }}>
                   <span className="eyebrow">07 — contact</span>
                   <h2 className="text-4xl md:text-6xl font-bold mb-5" style={{ color: 'var(--ink-100)' }}>
                     Let's build <span className="gradient-text">something.</span>
