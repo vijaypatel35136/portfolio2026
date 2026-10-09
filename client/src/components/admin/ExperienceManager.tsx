@@ -277,14 +277,14 @@ export default function ExperienceManager({ onUpdate, onToast }: ExperienceManag
                     type="text"
                     value={exp.title}
                     onChange={(e) => setExperiences(experiences.map((x) => x.id === exp.id ? { ...x, title: e.target.value } : x))}
-                    className="px-3 py-2 border border-gray-300 rounded text-sm"
+                    className="px-3 py-2 border border-gray-300 rounded text-sm text-black"
                     placeholder="Job title"
                   />
                   <input
                     type="text"
                     value={exp.company}
                     onChange={(e) => setExperiences(experiences.map((x) => x.id === exp.id ? { ...x, company: e.target.value } : x))}
-                    className="px-3 py-2 border border-gray-300 rounded text-sm"
+                    className="px-3 py-2 border border-gray-300 rounded text-sm text-black"
                     placeholder="Company"
                   />
                 </div>
@@ -293,14 +293,14 @@ export default function ExperienceManager({ onUpdate, onToast }: ExperienceManag
                     type="text"
                     value={exp.location}
                     onChange={(e) => setExperiences(experiences.map((x) => x.id === exp.id ? { ...x, location: e.target.value } : x))}
-                    className="px-3 py-2 border border-gray-300 rounded text-sm"
+                    className="px-3 py-2 border border-gray-300 rounded text-sm text-black"
                     placeholder="Location"
                   />
                   <input
                     type="text"
                     value={exp.start_date}
                     onChange={(e) => setExperiences(experiences.map((x) => x.id === exp.id ? { ...x, start_date: e.target.value } : x))}
-                    className="px-3 py-2 border border-gray-300 rounded text-sm"
+                    className="px-3 py-2 border border-gray-300 rounded text-sm text-black"
                     placeholder="Start date"
                   />
                 </div>
@@ -308,7 +308,7 @@ export default function ExperienceManager({ onUpdate, onToast }: ExperienceManag
                   value={exp.description}
                   onChange={(e) => setExperiences(experiences.map((x) => x.id === exp.id ? { ...x, description: e.target.value } : x))}
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm text-black"
                   placeholder="One bullet per line"
                 />
                 <div className="flex gap-2 justify-end">

@@ -252,14 +252,14 @@ export default function EducationManager({ onUpdate, onToast }: EducationManager
                     type="text"
                     value={edu.degree}
                     onChange={(e) => setEducations(educations.map((item) => item.id === edu.id ? { ...item, degree: e.target.value } : item))}
-                    className="px-3 py-2 border border-gray-300 rounded text-sm"
+                    className="px-3 py-2 border border-gray-300 rounded text-sm text-black"
                     placeholder="Degree"
                   />
                   <input
                     type="text"
                     value={edu.institution}
                     onChange={(e) => setEducations(educations.map((item) => item.id === edu.id ? { ...item, institution: e.target.value } : item))}
-                    className="px-3 py-2 border border-gray-300 rounded text-sm"
+                    className="px-3 py-2 border border-gray-300 rounded text-sm text-black"
                     placeholder="Institution"
                   />
                 </div>
@@ -268,14 +268,14 @@ export default function EducationManager({ onUpdate, onToast }: EducationManager
                     type="text"
                     value={edu.location}
                     onChange={(e) => setEducations(educations.map((item) => item.id === edu.id ? { ...item, location: e.target.value } : item))}
-                    className="px-3 py-2 border border-gray-300 rounded text-sm"
+                    className="px-3 py-2 border border-gray-300 rounded text-sm text-black"
                     placeholder="Location"
                   />
                   <input
                     type="date"
                     value={edu.start_date}
                     onChange={(e) => setEducations(educations.map((item) => item.id === edu.id ? { ...item, start_date: e.target.value } : item))}
-                    className="px-3 py-2 border border-gray-300 rounded text-sm"
+                    className="px-3 py-2 border border-gray-300 rounded text-sm text-black"
                   />
                 </div>
                 <div className="grid md:grid-cols-2 gap-4">
@@ -283,13 +283,13 @@ export default function EducationManager({ onUpdate, onToast }: EducationManager
                     type="date"
                     value={edu.end_date || ''}
                     onChange={(e) => setEducations(educations.map((item) => item.id === edu.id ? { ...item, end_date: e.target.value || null } : item))}
-                    className="px-3 py-2 border border-gray-300 rounded text-sm"
+                    className="px-3 py-2 border border-gray-300 rounded text-sm text-black"
                   />
                   <textarea
                     value={edu.description || ''}
                     onChange={(e) => setEducations(educations.map((item) => item.id === edu.id ? { ...item, description: e.target.value } : item))}
                     rows={2}
-                    className="px-3 py-2 border border-gray-300 rounded text-sm"
+                    className="px-3 py-2 border border-gray-300 rounded text-sm text-black"
                     placeholder="Description"
                   />
                 </div>

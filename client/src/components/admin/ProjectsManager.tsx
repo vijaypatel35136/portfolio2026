@@ -297,27 +297,27 @@ export default function ProjectsManager({ onUpdate, onToast }: ProjectsManagerPr
                     value={project.name}
                     onChange={(e) => setProjects(projects.map((p) => p.id === project.id ? { ...p, name: e.target.value } : p))}
                     placeholder="Project name"
-                    className="w-full px-3 py-2 border border-gray-300 rounded text-sm text-black"
+                    className="w-full px-3 py-2 border border-gray-300 rounded text-sm text-black text-black"
                   />
                   <input
                     type="url"
                     value={project.url}
                     onChange={(e) => setProjects(projects.map((p) => p.id === project.id ? { ...p, url: e.target.value } : p))}
                     placeholder="https://..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded text-sm text-black"
+                    className="w-full px-3 py-2 border border-gray-300 rounded text-sm text-black text-black"
                   />
                   <textarea
                     value={project.description}
                     onChange={(e) => setProjects(projects.map((p) => p.id === project.id ? { ...p, description: e.target.value } : p))}
                     rows={2}
-                    className="w-full px-3 py-2 border border-gray-300 rounded text-sm text-black"
+                    className="w-full px-3 py-2 border border-gray-300 rounded text-sm text-black text-black"
                   />
                   <input
                     type="text"
                     value={project.tech_stack}
                     onChange={(e) => setProjects(projects.map((p) => p.id === project.id ? { ...p, tech_stack: e.target.value } : p))}
                     placeholder="React, TypeScript, ..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded text-sm text-black"
+                    className="w-full px-3 py-2 border border-gray-300 rounded text-sm text-black text-black"
                   />
                   <div className="flex gap-2 justify-end">
                     <button
