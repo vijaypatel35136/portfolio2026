@@ -12,6 +12,7 @@ interface Project {
   tech_stack: string   // comma-separated string for the form input
   category: string
   is_featured: boolean
+  images: string      // comma-separated image URLs
 }
 
 interface ProjectsManagerProps {
@@ -33,6 +34,7 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
     tech_stack: '',
     category: 'Shopify',
     is_featured: false,
+    images: '',
   })
   const [deleteId, setDeleteId] = useState<number | null>(null)
 
@@ -54,6 +56,9 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
             : String(p.tech_stack || ''),
           category: p.category || 'Shopify',
           is_featured: p.is_featured || false,
+          images: Array.isArray((p as any).images)
+            ? (p as any).images.join(', ')
+            : String((p as any).images || ''),
         })),
       )
     } catch (err) {
@@ -67,6 +72,7 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
     e.preventDefault()
     setSaving(true)
     try {
+      const imagesArray = formData.images.split(',').map((s) => s.trim()).filter(Boolean)
       await createProject({
         name: formData.name,
         url: formData.url,
@@ -74,10 +80,11 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
         tech_stack: formData.tech_stack.split(',').map((s) => s.trim()).filter(Boolean),
         category: formData.category,
         is_featured: formData.is_featured,
-        image_url: '',
+        image_url: imagesArray.length > 0 ? imagesArray[0] : '',
+        images: imagesArray,
         github_url: '',
       })
-      setFormData({ name: '', url: '', description: '', tech_stack: '', category: 'Shopify', is_featured: false })
+      setFormData({ name: '', url: '', description: '', tech_stack: '', category: 'Shopify', is_featured: false, images: '' })
       setShowAddForm(false)
       await fetchProjects()
       onUpdate()
@@ -94,6 +101,7 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
     const project = projects.find((p) => p.id === id)
     if (!project) { setSaving(false); return }
     try {
+      const imagesArray = project.images.split(',').map((s) => s.trim()).filter(Boolean)
       await updateProject(id, {
         name: project.name,
         url: project.url,
@@ -101,6 +109,8 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
         tech_stack: project.tech_stack.split(',').map((s) => s.trim()).filter(Boolean),
         category: project.category,
         is_featured: project.is_featured,
+        image_url: imagesArray.length > 0 ? imagesArray[0] : '',
+        images: imagesArray,
       })
       await fetchProjects()
       onUpdate()
@@ -292,6 +302,25 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
                 </select>
               </div>
             </div>
+            <div>
+              <label className={`block text-sm font-semibold mb-2 ${
+                darkMode ? 'text-gray-300' : 'text-navy-800'
+              }`}>Image URLs (comma separated - optional)</label>
+              <input
+                type="text"
+                value={formData.images}
+                onChange={(e) => setFormData({ ...formData, images: e.target.value })}
+                placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                  darkMode
+                    ? 'bg-navy-700 border-navy-600 text-white'
+                    : 'bg-gray-50 border-gray-300 text-black'
+                }`}
+              />
+              <p className={`text-xs mt-1 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                Add multiple image URLs separated by commas. Multiple images will show as a slider.
+              </p>
+            </div>
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"
@@ -394,6 +423,17 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
                     value={project.tech_stack}
                     onChange={(e) => setProjects(projects.map((p) => p.id === project.id ? { ...p, tech_stack: e.target.value } : p))}
                     placeholder="React, TypeScript, ..."
+                    className={`w-full px-3 py-2 border rounded text-sm ${
+                      darkMode
+                        ? 'bg-navy-700 border-navy-600 text-white'
+                        : 'bg-gray-50 border-gray-300 text-black'
+                    }`}
+                  />
+                  <input
+                    type="text"
+                    value={project.images}
+                    onChange={(e) => setProjects(projects.map((p) => p.id === project.id ? { ...p, images: e.target.value } : p))}
+                    placeholder="Image URLs (comma separated)"
                     className={`w-full px-3 py-2 border rounded text-sm ${
                       darkMode
                         ? 'bg-navy-700 border-navy-600 text-white'

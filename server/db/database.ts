@@ -110,6 +110,7 @@ export async function initDatabase() {
         tech_stack TEXT,
         category TEXT DEFAULT 'Shopify',
         thumbnail TEXT,
+        images TEXT,
         is_featured BOOLEAN DEFAULT false,
         display_order INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

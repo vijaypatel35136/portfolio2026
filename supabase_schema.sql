@@ -2,6 +2,12 @@
 -- Supabase Schema & Initial Data Migration for Vijay Portfolio
 -- ============================================================================
 
+-- Migration: Add images column to projects table
+-- Run this in Supabase SQL Editor if your database already exists
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS images JSONB DEFAULT '[]'::jsonb;
+
+-- ============================================================================
+
 -- 1. Admin Table
 CREATE TABLE IF NOT EXISTS admin (
   id SERIAL PRIMARY KEY,
@@ -63,6 +69,7 @@ CREATE TABLE IF NOT EXISTS projects (
   tech_stack JSONB DEFAULT '[]'::jsonb,
   category TEXT DEFAULT 'Shopify',
   image_url TEXT,
+  images JSONB DEFAULT '[]'::jsonb,
   github_url TEXT,
   is_featured BOOLEAN DEFAULT FALSE,
   display_order INTEGER DEFAULT 0,

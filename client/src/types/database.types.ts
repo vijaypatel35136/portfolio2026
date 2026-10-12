@@ -46,6 +46,7 @@ export interface Project {
   description: string
   category?: string
   image_url?: string
+  images?: string[]
   github_url?: string
   url?: string
   tech_stack: string[]

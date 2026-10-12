@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import Slider from 'react-slick'
+import 'slick-carousel/slick/slick.css'
+import 'slick-carousel/slick/slick-theme.css'
 import {
   ArrowRight, ArrowUpRight, Download, Mail, Phone, Linkedin, Github, ChevronUp, Terminal, Sparkles, Zap,
   MapPin, Rocket, GraduationCap, Briefcase, ShoppingBag, Code2, Globe, Layers, Server, Wrench,
@@ -82,6 +85,8 @@ interface Project {
   description: string
   tech_stack: string | string[]
   category: string
+  image_url?: string
+  images?: string[]
   is_featured: boolean
 }
 
@@ -97,6 +102,57 @@ interface Education {
 interface HomeProps {
   darkMode?: boolean
   setDarkMode?: (value: boolean) => void
+}
+
+// Helper component for project images
+function ProjectImages({ project, index }: { project: Project; index: number }) {
+  const images = project.images || (project.image_url ? [project.image_url] : [])
+  const hasImages = images.length > 0
+
+  if (!hasImages) {
+    // Fallback to gradient thumbnail with initial letter
+    return (
+      <div className={`proj-thumb t${index % 3}`}>
+        <span className="proj-initial">{project.name.charAt(0).toUpperCase()}</span>
+        <span className="proj-arrow"><ArrowUpRight size={17} /></span>
+      </div>
+    )
+  }
+
+  if (images.length === 1) {
+    // Single image display
+    return (
+      <div className="proj-thumb-img">
+        <img src={images[0]} alt={project.name} className="w-full h-full object-cover" />
+        <span className="proj-arrow"><ArrowUpRight size={17} /></span>
+      </div>
+    )
+  }
+
+  // Multiple images - use slider
+  const sliderSettings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    arrows: false,
+  }
+
+  return (
+    <div className="proj-thumb-slider">
+      <Slider {...sliderSettings}>
+        {images.map((img, i) => (
+          <div key={i}>
+            <img src={img} alt={`${project.name} ${i + 1}`} className="w-full h-full object-cover" />
+          </div>
+        ))}
+      </Slider>
+      <span className="proj-arrow"><ArrowUpRight size={17} /></span>
+    </div>
+  )
 }
 
 export default function Home({ darkMode = true, setDarkMode }: HomeProps) {
@@ -325,7 +381,7 @@ export default function Home({ darkMode = true, setDarkMode }: HomeProps) {
                 ))}
                 {'\n  '}],
                 {'\n  '}experience: <span className="tok-s">"{formatExperience()}"</span>,
-                {'\n  '}projects: <span className="tok-n">{profile?.projects_count || 15}</span>,
+                {'\n  '}projects: <span className="tok-n">{projects.length}</span>,
                 {'\n  '}based: <span className="tok-s">"{city}"</span>,
                 {'\n  '}ships: <span className="tok-n">true</span>,
                 {'\n'}{'}'}
@@ -395,7 +451,7 @@ export default function Home({ darkMode = true, setDarkMode }: HomeProps) {
 
               {[
                 { value: `${profile?.experience_years || 2}+`, label: 'Years experience', icon: <Zap size={18} /> },
-                { value: `${profile?.projects_count || 15}+`, label: 'Projects delivered', icon: <Rocket size={18} /> },
+                { value: `${projects.length}`, label: 'Projects delivered', icon: <Sparkles size={18} /> },
                 { value: city, label: 'Based in', icon: <MapPin size={18} /> },
                 { value: 'B.E.', label: 'Computer engineering', icon: <GraduationCap size={18} /> },
               ].map((stat, i) => (
@@ -504,40 +560,74 @@ export default function Home({ darkMode = true, setDarkMode }: HomeProps) {
             <SectionHead num="05" eyebrow="work" title="Selected work." sub="Live builds — storefronts, systems and sites shipped to production." />
           </ScrollReveal>
 
-          {featured.map((project) => (
-            <ScrollReveal key={project.id} animation="scale" delay={100}>
-              <div className="featured-card p-6 md:p-10 mb-8 grid lg:grid-cols-2 gap-10 items-center">
-                <div className="relative">
-                  <span className="featured-badge">★ featured</span>
-                  <h3 className="text-3xl md:text-4xl font-bold mt-5 mb-2" style={{ color: 'var(--ink-100)' }}>{project.name}</h3>
-                  <p className="mono text-sm mb-5" style={{ color: 'var(--teal-400)' }}>{(project.url || '').replace('https://', '')}</p>
-                  <p className="mb-6 leading-relaxed" style={{ color: 'var(--ink-300)' }}>{project.description}</p>
+          {featured.map((project) => {
+            const images = project.images || (project.image_url ? [project.image_url] : [])
+            const hasImages = images.length > 0
 
-                  <div className="flex flex-wrap gap-2 mb-8">
-                    {techList(project.tech_stack).map((tech, i) => (
-                      <span key={i} className={`skill-tag ${i % 2 === 0 ? 'accent-teal' : 'accent-amber'}`}>{tech}</span>
-                    ))}
+            return (
+              <ScrollReveal key={project.id} animation="scale" delay={100}>
+                <div className="featured-card p-6 md:p-10 mb-8 grid lg:grid-cols-2 gap-10 items-center">
+                  <div className="relative">
+                    <span className="featured-badge">★ featured</span>
+                    <h3 className="text-3xl md:text-4xl font-bold mt-5 mb-2" style={{ color: 'var(--ink-100)' }}>{project.name}</h3>
+                    <p className="mono text-sm mb-5" style={{ color: 'var(--teal-400)' }}>{(project.url || '').replace('https://', '')}</p>
+                    <p className="mb-6 leading-relaxed" style={{ color: 'var(--ink-300)' }}>{project.description}</p>
+
+                    <div className="flex flex-wrap gap-2 mb-8">
+                      {techList(project.tech_stack).map((tech, i) => (
+                        <span key={i} className={`skill-tag ${i % 2 === 0 ? 'accent-teal' : 'accent-amber'}`}>{tech}</span>
+                      ))}
+                    </div>
+
+                    <a href={project.url} target="_blank" rel="noopener noreferrer" className="btn-primary cta-glow inline-flex items-center gap-2 px-6 py-3">
+                      Visit site <ArrowUpRight size={17} />
+                    </a>
                   </div>
 
-                  <a href={project.url} target="_blank" rel="noopener noreferrer" className="btn-primary cta-glow inline-flex items-center gap-2 px-6 py-3">
-                    Visit site <ArrowUpRight size={17} />
-                  </a>
+                  {hasImages ? (
+                    images.length === 1 ? (
+                      <a href={project.url} target="_blank" rel="noopener noreferrer" className="featured-img-mock block relative group" aria-label={`Open ${project.name}`}>
+                        <img src={images[0]} alt={project.name} className="w-full h-auto rounded-xl object-cover" />
+                      </a>
+                    ) : (
+                      <div className="featured-slider">
+                        <Slider {...{
+                          dots: true,
+                          infinite: true,
+                          speed: 500,
+                          slidesToShow: 1,
+                          slidesToScroll: 1,
+                          autoplay: true,
+                          autoplaySpeed: 4000,
+                          arrows: true,
+                        }}>
+                          {images.map((img, i) => (
+                            <div key={i}>
+                              <a href={project.url} target="_blank" rel="noopener noreferrer" className="block">
+                                <img src={img} alt={`${project.name} ${i + 1}`} className="w-full h-auto rounded-xl object-cover" />
+                              </a>
+                            </div>
+                          ))}
+                        </Slider>
+                      </div>
+                    )
+                  ) : (
+                    <a href={project.url} target="_blank" rel="noopener noreferrer" className="browser-mock block relative group" aria-label={`Open ${project.name}`}>
+                      <div className="browser-bar">
+                        <span className="terminal-dot red" />
+                        <span className="terminal-dot yellow" />
+                        <span className="terminal-dot green" />
+                        <span className="browser-url">{(project.url || '').replace('https://', '')}</span>
+                      </div>
+                      <div className="browser-body">
+                        <span>{project.name.slice(0, 14)}</span>
+                      </div>
+                    </a>
+                  )}
                 </div>
-
-                <a href={project.url} target="_blank" rel="noopener noreferrer" className="browser-mock block relative group" aria-label={`Open ${project.name}`}>
-                  <div className="browser-bar">
-                    <span className="terminal-dot red" />
-                    <span className="terminal-dot yellow" />
-                    <span className="terminal-dot green" />
-                    <span className="browser-url">{(project.url || '').replace('https://', '')}</span>
-                  </div>
-                  <div className="browser-body">
-                    <span>{project.name.slice(0, 14)}</span>
-                  </div>
-                </a>
-              </div>
-            </ScrollReveal>
-          ))}
+              </ScrollReveal>
+            )
+          })}
 
           <div className="flex flex-wrap gap-2.5 mb-8">
             {categories.map((cat) => (
@@ -561,13 +651,11 @@ export default function Home({ darkMode = true, setDarkMode }: HomeProps) {
                   rel="noopener noreferrer"
                   className="panel panel-hover proj-card group"
                 >
-                  <div className={`proj-thumb t${index % 3}`}>
-                    <span className="proj-initial">{project.name.charAt(0).toUpperCase()}</span>
-                    <span className="proj-arrow"><ArrowUpRight size={17} /></span>
-                  </div>
+                  <ProjectImages project={project} index={index} />
                   <div className="p-6">
                     <h3 className="text-lg font-semibold mb-1.5" style={{ color: 'var(--ink-100)' }}>{project.name}</h3>
                     <p className="mono text-xs break-all mb-4" style={{ color: 'var(--ink-500)' }}>{(project.url || '').replace('https://', '')}</p>
+                    <p className="mono text-xs break-all mb-4" style={{ color: 'var(--ink-500)' }}>{project.description}</p>
                     {project.category && <span className="skill-tag accent-teal">{project.category}</span>}
                   </div>
                 </a>
