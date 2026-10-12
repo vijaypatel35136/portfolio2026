@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Plus, Edit2, Trash2, Save, X, ExternalLink, Star } from 'lucide-react'
+import { Plus, Edit2, Trash2, Save, X, ExternalLink, Star, Upload, Image as ImageIcon } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { getProjects, createProject, updateProject, deleteProject } from '../../services/projectService'
+import { uploadImages } from '../../services/storageService'
 import ConfirmationModal from './ConfirmationModal'
 
 interface Project {
@@ -13,6 +14,7 @@ interface Project {
   category: string
   is_featured: boolean
   images: string      // comma-separated image URLs
+  imageFiles?: File[] // uploaded image files
 }
 
 interface ProjectsManagerProps {
@@ -35,8 +37,11 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
     category: 'Shopify',
     is_featured: false,
     images: '',
+    imageFiles: [] as File[],
   })
   const [deleteId, setDeleteId] = useState<number | null>(null)
+  const [imagePreviews, setImagePreviews] = useState<string[]>([])
+  const [editImagePreviews, setEditImagePreviews] = useState<Record<number, string[]>>({})
 
   useEffect(() => {
     fetchProjects()
@@ -59,6 +64,7 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
           images: Array.isArray((p as any).images)
             ? (p as any).images.join(', ')
             : String((p as any).images || ''),
+          imageFiles: [],
         })),
       )
     } catch (err) {
@@ -72,7 +78,17 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
     e.preventDefault()
     setSaving(true)
     try {
-      const imagesArray = formData.images.split(',').map((s) => s.trim()).filter(Boolean)
+      // Upload files to Supabase Storage
+      let uploadedImages: string[] = []
+      if (formData.imageFiles.length > 0) {
+        onToast?.('Uploading images...', 'success')
+        uploadedImages = await uploadImages(formData.imageFiles)
+      }
+
+      // Combine uploaded images and URL inputs
+      const urlImages = formData.images.split(',').map((s) => s.trim()).filter(Boolean)
+      const allImages = [...uploadedImages, ...urlImages]
+
       await createProject({
         name: formData.name,
         url: formData.url,
@@ -80,11 +96,12 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
         tech_stack: formData.tech_stack.split(',').map((s) => s.trim()).filter(Boolean),
         category: formData.category,
         is_featured: formData.is_featured,
-        image_url: imagesArray.length > 0 ? imagesArray[0] : '',
-        images: imagesArray,
+        image_url: allImages.length > 0 ? allImages[0] : '',
+        images: allImages,
         github_url: '',
       })
-      setFormData({ name: '', url: '', description: '', tech_stack: '', category: 'Shopify', is_featured: false, images: '' })
+      setFormData({ name: '', url: '', description: '', tech_stack: '', category: 'Shopify', is_featured: false, images: '', imageFiles: [] })
+      setImagePreviews([])
       setShowAddForm(false)
       await fetchProjects()
       onUpdate()
@@ -101,7 +118,17 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
     const project = projects.find((p) => p.id === id)
     if (!project) { setSaving(false); return }
     try {
-      const imagesArray = project.images.split(',').map((s) => s.trim()).filter(Boolean)
+      // Upload files to Supabase Storage
+      let uploadedImages: string[] = []
+      if (project.imageFiles && project.imageFiles.length > 0) {
+        onToast?.('Uploading images to Supabase Storage...', 'success')
+        uploadedImages = await uploadImages(project.imageFiles, id)
+      }
+
+      // Combine uploaded images and URL inputs
+      const urlImages = project.images.split(',').map((s) => s.trim()).filter(Boolean)
+      const allImages = [...uploadedImages, ...urlImages]
+
       await updateProject(id, {
         name: project.name,
         url: project.url,
@@ -109,12 +136,15 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
         tech_stack: project.tech_stack.split(',').map((s) => s.trim()).filter(Boolean),
         category: project.category,
         is_featured: project.is_featured,
-        image_url: imagesArray.length > 0 ? imagesArray[0] : '',
-        images: imagesArray,
+        image_url: allImages.length > 0 ? allImages[0] : '',
+        images: allImages,
       })
       await fetchProjects()
       onUpdate()
       setEditingId(null)
+      // Clear imageFiles and previews after successful update
+      setProjects(projects.map((p) => p.id === id ? { ...p, imageFiles: [] } : p))
+      setEditImagePreviews(prev => ({ ...prev, [id]: [] }))
       onToast?.('Project updated successfully!', 'success')
     } catch (err) {
       onToast?.(err instanceof Error ? err.message : 'Failed to update project', 'error')
@@ -156,6 +186,100 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
     } catch (err) {
       onToast?.('Failed to toggle featured status', 'error')
     }
+  }
+
+  // Handle file selection for add form
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    const maxSize = 5 * 1024 * 1024 // 5MB limit per file
+
+    const validFiles = files.filter(file => {
+      if (file.size > maxSize) {
+        onToast?.(`File ${file.name} is too large (max 5MB)`, 'error')
+        return false
+      }
+      if (!file.type.startsWith('image/')) {
+        onToast?.(`File ${file.name} is not an image`, 'error')
+        return false
+      }
+      return true
+    })
+
+    if (validFiles.length > 0) {
+      setFormData({ ...formData, imageFiles: [...formData.imageFiles, ...validFiles] })
+
+      // Create previews
+      validFiles.forEach(file => {
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          setImagePreviews(prev => [...prev, reader.result as string])
+        }
+        reader.readAsDataURL(file)
+      })
+    }
+  }
+
+  // Handle file selection for edit mode
+  const handleEditImageUpload = (projectId: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    const maxSize = 5 * 1024 * 1024
+
+    const validFiles = files.filter(file => {
+      if (file.size > maxSize) {
+        onToast?.(`File ${file.name} is too large (max 5MB)`, 'error')
+        return false
+      }
+      if (!file.type.startsWith('image/')) {
+        onToast?.(`File ${file.name} is not an image`, 'error')
+        return false
+      }
+      return true
+    })
+
+    if (validFiles.length > 0) {
+      setProjects(projects.map((p) => p.id === projectId ? { ...p, imageFiles: [...(p.imageFiles || []), ...validFiles] } : p))
+
+      // Create previews for edit mode
+      validFiles.forEach(file => {
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          setEditImagePreviews(prev => ({
+            ...prev,
+            [projectId]: [...(prev[projectId] || []), reader.result as string]
+          }))
+        }
+        reader.readAsDataURL(file)
+      })
+    }
+  }
+
+  // Remove image from list
+  const removeImage = (index: number) => {
+    const newFiles = formData.imageFiles.filter((_, i) => i !== index)
+    const newPreviews = imagePreviews.filter((_, i) => i !== index)
+    setFormData({ ...formData, imageFiles: newFiles })
+    setImagePreviews(newPreviews)
+  }
+
+  // Remove image from edit mode
+  const removeEditImage = (projectId: number, index: number) => {
+    const project = projects.find(p => p.id === projectId)
+    if (!project) return
+
+    const newFiles = (project.imageFiles || []).filter((_, i) => i !== index)
+    const newPreviews = (editImagePreviews[projectId] || []).filter((_, i) => i !== index)
+
+    setProjects(projects.map((p) => p.id === projectId ? { ...p, imageFiles: newFiles } : p))
+    setEditImagePreviews(prev => ({
+      ...prev,
+      [projectId]: newPreviews
+    }))
+  }
+
+  // Clear all images
+  const clearImages = () => {
+    setFormData({ ...formData, imageFiles: [], images: '' })
+    setImagePreviews([])
   }
 
   if (loading) {
@@ -305,6 +429,77 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
             <div>
               <label className={`block text-sm font-semibold mb-2 ${
                 darkMode ? 'text-gray-300' : 'text-navy-800'
+              }`}>Upload Images</label>
+              <div className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                darkMode
+                  ? 'border-navy-600 hover:border-teal-500 bg-navy-800/50'
+                  : 'border-gray-300 hover:border-teal-500 bg-gray-50'
+              }`}>
+                <input
+                  type="file"
+                  id="imageUpload"
+                  multiple
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+                <label
+                  htmlFor="imageUpload"
+                  className="cursor-pointer flex flex-col items-center gap-2"
+                >
+                  <Upload size={32} className={darkMode ? 'text-teal-400' : 'text-teal-600'} />
+                  <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                    Click to upload images
+                  </p>
+                  <p className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                    PNG, JPG, GIF up to 5MB each
+                  </p>
+                </label>
+              </div>
+
+              {/* Image Previews */}
+              {imagePreviews.length > 0 && (
+                <div className="mt-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Uploaded Images ({imagePreviews.length})
+                    </p>
+                    <button
+                      type="button"
+                      onClick={clearImages}
+                      className={`text-xs px-2 py-1 rounded ${
+                        darkMode
+                          ? 'text-red-400 hover:bg-red-900/30'
+                          : 'text-red-600 hover:bg-red-50'
+                      }`}
+                    >
+                      Clear All
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2">
+                    {imagePreviews.map((preview, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={preview}
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-20 object-cover rounded-lg"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div>
+              <label className={`block text-sm font-semibold mb-2 ${
+                darkMode ? 'text-gray-300' : 'text-navy-800'
               }`}>Image URLs (comma separated - optional)</label>
               <input
                 type="text"
@@ -336,7 +531,11 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
             <div className="flex gap-2 justify-end">
               <button
                 type="button"
-                onClick={() => setShowAddForm(false)}
+                onClick={() => {
+                  setShowAddForm(false)
+                  setFormData({ name: '', url: '', description: '', tech_stack: '', category: 'Shopify', is_featured: false, images: '', imageFiles: [] })
+                  setImagePreviews([])
+                }}
                 className={`px-4 py-2 border rounded-lg transition-colors ${
                   darkMode
                     ? 'border-navy-600 text-gray-300 hover:bg-navy-700'
@@ -440,6 +639,69 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
                         : 'bg-gray-50 border-gray-300 text-black'
                     }`}
                   />
+                  {/* Show existing images */}
+                  {project.images && (
+                    <div className="grid grid-cols-4 gap-2 mt-2">
+                      {project.images.split(',').map((img, i) => (
+                        <img
+                          key={i}
+                          src={img.trim()}
+                          alt={`Project ${i + 1}`}
+                          className="w-full h-16 object-cover rounded"
+                        />
+                      ))}
+                    </div>
+                  )}
+                  <div className={`border-2 border-dashed rounded-lg p-4 text-center ${
+                    darkMode
+                      ? 'border-navy-600 bg-navy-800/50'
+                      : 'border-gray-300 bg-gray-50'
+                  }`}>
+                    <input
+                      type="file"
+                      id={`imageUpload-${project.id}`}
+                      multiple
+                      accept="image/*"
+                      onChange={(e) => handleEditImageUpload(project.id, e)}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor={`imageUpload-${project.id}`}
+                      className="cursor-pointer flex flex-col items-center gap-1"
+                    >
+                      <Upload size={20} className={darkMode ? 'text-teal-400' : 'text-teal-600'} />
+                      <p className={`text-xs ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                        Upload more images
+                      </p>
+                      {(project.imageFiles || []).length > 0 && (
+                        <p className={`text-xs font-semibold ${darkMode ? 'text-teal-400' : 'text-teal-600'}`}>
+                          {(project.imageFiles || []).length} new image{(project.imageFiles || []).length > 1 ? 's' : ''} ready to upload
+                        </p>
+                      )}
+                    </label>
+
+                    {/* Show new image previews for edit mode */}
+                    {(editImagePreviews[project.id] || []).length > 0 && (
+                      <div className="mt-3 grid grid-cols-4 gap-2">
+                        {(editImagePreviews[project.id] || []).map((preview, index) => (
+                          <div key={index} className="relative group">
+                            <img
+                              src={preview}
+                              alt={`New preview ${index + 1}`}
+                              className="w-full h-16 object-cover rounded-lg"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeEditImage(project.id, index)}
+                              className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                            >
+                              <X size={10} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   <div className="flex gap-2 justify-end">
                     <button
                       onClick={() => handleUpdate(project.id)}
@@ -453,7 +715,11 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
                       <Save size={16} />
                     </button>
                     <button
-                      onClick={() => setEditingId(null)}
+                      onClick={() => {
+                        setEditingId(null)
+                        setEditImagePreviews(prev => ({ ...prev, [project.id]: [] }))
+                        setProjects(projects.map((p) => p.id === project.id ? { ...p, imageFiles: [] } : p))
+                      }}
                       className={`p-2 rounded transition-colors ${
                         darkMode
                           ? 'text-gray-400 hover:bg-navy-700'
@@ -491,6 +757,26 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
                     }`}>
                       <span className="font-semibold">Tech:</span> {project.tech_stack}
                     </p>
+                  )}
+                  {/* Image Thumbnails */}
+                  {project.images && (
+                    <div className="grid grid-cols-4 gap-2 mb-3">
+                      {project.images.split(',').slice(0, 4).map((img, i) => (
+                        <img
+                          key={i}
+                          src={img.trim()}
+                          alt={`Project ${i + 1}`}
+                          className="w-full h-16 object-cover rounded"
+                        />
+                      ))}
+                      {project.images.split(',').length > 4 && (
+                        <div className={`w-full h-16 rounded flex items-center justify-center ${
+                          darkMode ? 'bg-navy-700 text-gray-400' : 'bg-gray-100 text-gray-600'
+                        }`}>
+                          <span className="text-xs">+{project.images.split(',').length - 4}</span>
+                        </div>
+                      )}
+                    </div>
                   )}
                   <div className={`flex items-center justify-between pt-3 border-t ${
                     darkMode ? 'border-navy-700' : 'border-gray-200'
