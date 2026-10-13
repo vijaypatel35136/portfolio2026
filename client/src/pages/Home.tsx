@@ -620,7 +620,7 @@ export default function Home({ darkMode = true, setDarkMode }: HomeProps) {
                         <span className="browser-url">{(project.url || '').replace('https://', '')}</span>
                       </div>
                       <div className="browser-body">
-                        <span>{project.name.slice(0, 14)}</span>
+                        <span>{project.name}</span>
                       </div>
                     </a>
                   )}
