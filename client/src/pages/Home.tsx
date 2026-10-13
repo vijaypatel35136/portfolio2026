@@ -113,6 +113,7 @@ function ProjectImages({ project, index }: { project: Project; index: number }) 
     // Fallback to gradient thumbnail with initial letter
     return (
       <div className={`proj-thumb t${index % 3}`}>
+        {project.category && <span className="skill-tag accent-teal">{project.category}</span>}
         <span className="proj-initial">{project.name.charAt(0).toUpperCase()}</span>
         <span className="proj-arrow"><ArrowUpRight size={17} /></span>
       </div>
@@ -654,9 +655,8 @@ export default function Home({ darkMode = true, setDarkMode }: HomeProps) {
                   <ProjectImages project={project} index={index} />
                   <div className="p-6">
                     <h3 className="text-lg font-semibold mb-1.5" style={{ color: 'var(--ink-100)' }}>{project.name}</h3>
-                    <p className="mono text-xs break-all mb-4" style={{ color: 'var(--ink-500)' }}>{(project.url || '').replace('https://', '')}</p>
+                    {/* <p className="mono text-xs break-all mb-4" style={{ color: 'var(--ink-500)' }}>{(project.url || '').replace('https://', '')}</p> */}
                     <p className="mono text-xs break-all mb-4" style={{ color: 'var(--ink-500)' }}>{project.description}</p>
-                    {project.category && <span className="skill-tag accent-teal">{project.category}</span>}
                   </div>
                 </a>
               ))}

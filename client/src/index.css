@@ -761,6 +761,10 @@ html:not(.dark) .aurora i { opacity: 0.38; }
   cursor: default;
   transition: transform var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
   user-select: none;
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .skill-tag:hover { transform: translateY(-2px); }
 .skill-tag.accent-teal:hover { border-color: var(--teal-500); color: var(--teal-400); background: var(--teal-100); }
@@ -856,13 +860,13 @@ html:not(.dark) .aurora i { opacity: 0.38; }
 }
 .browser-body span {
   font-family: var(--font-display); font-weight: 700; letter-spacing: -0.04em;
-  font-size: clamp(2.4rem, 6vw, 4.4rem);
+  font-size: clamp(2.4rem, 6vw, 3.7rem);
   color: transparent; -webkit-text-stroke: 1.5px var(--teal-400); opacity: 0.9;
 }
 
 .proj-card { display: block; overflow: hidden; padding: 0 !important; }
 .proj-thumb {
-  position: relative; height: 128px;
+  position: relative; height: 175px;
   display: flex; align-items: flex-end; justify-content: space-between;
   padding: 14px 18px;
   border-bottom: 1px solid var(--border-line);
@@ -881,16 +885,18 @@ html:not(.dark) .aurora i { opacity: 0.38; }
   color: transparent; -webkit-text-stroke: 1.5px var(--teal-400);
 }
 .proj-arrow {
-  position: relative; width: 38px; height: 38px; border-radius: 50%;
+  position: absolute; width: 38px; height: 38px; border-radius: 50%;
   display: inline-flex; align-items: center; justify-content: center;
   background: var(--bg-panel); border: 1px solid var(--border-strong); color: var(--ink-300);
-  transition: all var(--transition-normal);
+  top: 18px;
+  right: 18px;
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .proj-card:hover .proj-arrow { background: var(--teal-500); border-color: var(--teal-500); color: var(--ink-on-primary); transform: rotate(45deg); }
 
 /* Project image display */
 .proj-thumb-img {
-  position: relative; height: 128px;
+  position: relative; height: 175px;
   overflow: hidden;
   border-bottom: 1px solid var(--border-line);
 }
@@ -902,7 +908,7 @@ html:not(.dark) .aurora i { opacity: 0.38; }
 
 /* Project slider display */
 .proj-thumb-slider {
-  position: relative; height: 128px;
+  position: relative; height: 175px;
   overflow: hidden;
   border-bottom: 1px solid var(--border-line);
 }
@@ -918,7 +924,7 @@ html:not(.dark) .aurora i { opacity: 0.38; }
   width: 100%; height: 100%; object-fit: cover;
 }
 .proj-thumb-slider .slick-dots {
-  position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+  position: absolute; bottom: 0px; left: 50%; transform: translateX(-50%);
   z-index: 10;
 }
 .proj-thumb-slider .slick-dots li button {
