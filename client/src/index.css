@@ -961,6 +961,10 @@ html:not(.dark) .aurora i { opacity: 0.38; }
   position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
   z-index: 10;
 }
+.slick-dots li button::before{
+  content:'';
+  display:none;
+}
 .featured-slider .slick-dots li button {
   width: 8px; height: 8px;
   background: var(--ink-500); opacity: 0.6;
