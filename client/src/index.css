@@ -963,7 +963,7 @@ html:not(.dark) .aurora i { opacity: 0.38; }
 }
 .slick-dots li button::before{
   content:'';
-  display:none;
+  display:none !important;
 }
 .featured-slider .slick-dots li button {
   width: 8px; height: 8px;
