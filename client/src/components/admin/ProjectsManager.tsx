@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Plus, Edit2, Trash2, Save, X, ExternalLink, Star, Upload, Image as ImageIcon } from 'lucide-react'
+import { Plus, Edit2, Trash2, Save, X, ExternalLink, Star, Upload, Image as ImageIcon, ChevronDown, ChevronUp } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { getProjects, createProject, updateProject, deleteProject } from '../../services/projectService'
 import { uploadImages } from '../../services/storageService'
+import { getCategories, createCategory, updateCategory, deleteCategory, ProjectCategory } from '../../services/categoryService'
 import ConfirmationModal from './ConfirmationModal'
 
 interface Project {
@@ -25,10 +26,12 @@ interface ProjectsManagerProps {
 
 export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: ProjectsManagerProps) {
   const [projects, setProjects] = useState<Project[]>([])
+  const [categories, setCategories] = useState<ProjectCategory[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [showAddForm, setShowAddForm] = useState(false)
+  const [showCategoryManager, setShowCategoryManager] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     url: '',
@@ -42,9 +45,21 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
   const [deleteId, setDeleteId] = useState<number | null>(null)
   const [imagePreviews, setImagePreviews] = useState<string[]>([])
   const [editImagePreviews, setEditImagePreviews] = useState<Record<number, string[]>>({})
+  const [newCategoryName, setNewCategoryName] = useState('')
+  const [editingCategoryId, setEditingCategoryId] = useState<number | null>(null)
+  const [editingCategoryName, setEditingCategoryName] = useState('')
+  const [deleteCategoryId, setDeleteCategoryId] = useState<number | null>(null)
+
+  // Update default category when categories load
+  useEffect(() => {
+    if (categories.length > 0) {
+      setFormData(prev => ({ ...prev, category: categories[0].name }))
+    }
+  }, [categories])
 
   useEffect(() => {
     fetchProjects()
+    fetchCategories()
   }, [])
 
   async function fetchProjects() {
@@ -74,6 +89,15 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
     }
   }
 
+  async function fetchCategories() {
+    try {
+      const data = await getCategories()
+      setCategories(data)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
     setSaving(true)
@@ -100,7 +124,8 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
         images: allImages,
         github_url: '',
       })
-      setFormData({ name: '', url: '', description: '', tech_stack: '', category: 'Shopify', is_featured: false, images: '', imageFiles: [] })
+      const defaultCategory = categories.length > 0 ? categories[0].name : 'Shopify'
+      setFormData({ name: '', url: '', description: '', tech_stack: '', category: defaultCategory, is_featured: false, images: '', imageFiles: [] })
       setImagePreviews([])
       setShowAddForm(false)
       await fetchProjects()
@@ -185,6 +210,72 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
       onUpdate()
     } catch (err) {
       onToast?.('Failed to toggle featured status', 'error')
+    }
+  }
+
+  const handleAddCategory = async () => {
+    if (!newCategoryName.trim()) {
+      onToast?.('Please enter a category name', 'error')
+      return
+    }
+    try {
+      const maxOrder = categories.length > 0 ? Math.max(...categories.map(c => c.display_order)) : -1
+      await createCategory(newCategoryName.trim(), maxOrder + 1)
+      setNewCategoryName('')
+      await fetchCategories()
+      onToast?.('Category added successfully!', 'success')
+    } catch (err) {
+      onToast?.(err instanceof Error ? err.message : 'Failed to add category', 'error')
+    }
+  }
+
+  const handleUpdateCategory = async (id: number) => {
+    if (!editingCategoryName.trim()) {
+      onToast?.('Please enter a category name', 'error')
+      return
+    }
+    const category = categories.find(c => c.id === id)
+    if (!category) return
+    try {
+      await updateCategory(id, editingCategoryName.trim(), category.display_order)
+      setEditingCategoryId(null)
+      setEditingCategoryName('')
+      await fetchCategories()
+      onToast?.('Category updated successfully!', 'success')
+    } catch (err) {
+      onToast?.(err instanceof Error ? err.message : 'Failed to update category', 'error')
+    }
+  }
+
+  const handleDeleteCategory = async () => {
+    if (deleteCategoryId === null) return
+    try {
+      await deleteCategory(deleteCategoryId)
+      setDeleteCategoryId(null)
+      await fetchCategories()
+      onToast?.('Category deleted successfully!', 'success')
+    } catch (err) {
+      onToast?.(err instanceof Error ? err.message : 'Failed to delete category', 'error')
+    }
+  }
+
+  const moveCategory = async (id: number, direction: 'up' | 'down') => {
+    const currentIndex = categories.findIndex(c => c.id === id)
+    if (currentIndex === -1) return
+
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
+    if (newIndex < 0 || newIndex >= categories.length) return
+
+    const currentCategory = categories[currentIndex]
+    const targetCategory = categories[newIndex]
+
+    try {
+      await updateCategory(currentCategory.id, currentCategory.name, targetCategory.display_order)
+      await updateCategory(targetCategory.id, targetCategory.name, currentCategory.display_order)
+      await fetchCategories()
+      onToast?.('Category order updated!', 'success')
+    } catch (err) {
+      onToast?.('Failed to update category order', 'error')
     }
   }
 
@@ -310,18 +401,202 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
         <h2 className={`font-heading text-2xl font-bold ${
           darkMode ? 'text-white' : 'text-navy-800'
         }`}>Projects Manager</h2>
-        <button
-          onClick={() => setShowAddForm(!showAddForm)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowCategoryManager(!showCategoryManager)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+              darkMode
+                ? 'bg-navy-700 text-gray-300 hover:bg-navy-600 border border-navy-600'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
+            }`}
+          >
+            <Edit2 size={18} />
+            Manage Categories
+          </button>
+          <button
+            onClick={() => setShowAddForm(!showAddForm)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+              darkMode
+                ? 'bg-teal-600 text-white hover:bg-teal-700'
+                : 'bg-teal-500 text-white hover:bg-teal-600'
+            }`}
+          >
+            <Plus size={18} />
+            Add Project
+          </button>
+        </div>
+      </div>
+
+      {/* Category Manager */}
+      {showCategoryManager && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`rounded-xl border p-6 ${
             darkMode
-              ? 'bg-teal-600 text-white hover:bg-teal-700'
-              : 'bg-teal-500 text-white hover:bg-teal-600'
+              ? 'bg-navy-800 border-navy-700'
+              : 'bg-white border-gray-200'
           }`}
         >
-          <Plus size={18} />
-          Add Project
-        </button>
-      </div>
+          <h3 className={`font-heading text-lg font-semibold mb-4 ${
+            darkMode ? 'text-white' : 'text-navy-800'
+          }`}>Manage Categories</h3>
+
+          <ConfirmationModal
+            isOpen={deleteCategoryId !== null}
+            title="Delete Category"
+            message="Are you sure you want to delete this category? Projects in this category will need to be reassigned."
+            onConfirm={handleDeleteCategory}
+            onCancel={() => setDeleteCategoryId(null)}
+          />
+
+          {/* Add New Category */}
+          <div className="flex gap-2 mb-6">
+            <input
+              type="text"
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+              placeholder="New category name"
+              className={`flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+                darkMode
+                  ? 'bg-navy-700 border-navy-600 text-white'
+                  : 'bg-gray-50 border-gray-300 text-black'
+              }`}
+            />
+            <button
+              onClick={handleAddCategory}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                darkMode
+                  ? 'bg-teal-600 text-white hover:bg-teal-700'
+                  : 'bg-teal-500 text-white hover:bg-teal-600'
+              }`}
+            >
+              Add
+            </button>
+          </div>
+
+          {/* Category List */}
+          <div className="space-y-2">
+            {categories.map((category, index) => (
+              <div
+                key={category.id}
+                className={`flex items-center gap-2 p-3 rounded-lg ${
+                  darkMode
+                    ? 'bg-navy-700 border border-navy-600'
+                    : 'bg-gray-50 border border-gray-200'
+                }`}
+              >
+                <span className={`text-sm font-medium ${
+                  darkMode ? 'text-gray-300' : 'text-gray-700'
+                }`}>{index + 1}.</span>
+
+                {editingCategoryId === category.id ? (
+                  <input
+                    type="text"
+                    value={editingCategoryName}
+                    onChange={(e) => setEditingCategoryName(e.target.value)}
+                    className={`flex-1 px-3 py-1 border rounded text-sm ${
+                      darkMode
+                        ? 'bg-navy-600 border-navy-500 text-white'
+                        : 'bg-white border-gray-300 text-black'
+                    }`}
+                  />
+                ) : (
+                  <span className={`flex-1 text-sm ${
+                    darkMode ? 'text-white' : 'text-gray-900'
+                  }`}>{category.name}</span>
+                )}
+
+                <div className="flex gap-1">
+                  {index > 0 && (
+                    <button
+                      onClick={() => moveCategory(category.id, 'up')}
+                      className={`p-1.5 rounded transition-colors ${
+                        darkMode
+                          ? 'text-gray-400 hover:bg-navy-600'
+                          : 'text-gray-600 hover:bg-gray-200'
+                      }`}
+                      title="Move up"
+                    >
+                      <ChevronUp size={16} />
+                    </button>
+                  )}
+                  {index < categories.length - 1 && (
+                    <button
+                      onClick={() => moveCategory(category.id, 'down')}
+                      className={`p-1.5 rounded transition-colors ${
+                        darkMode
+                          ? 'text-gray-400 hover:bg-navy-600'
+                          : 'text-gray-600 hover:bg-gray-200'
+                      }`}
+                      title="Move down"
+                    >
+                      <ChevronDown size={16} />
+                    </button>
+                  )}
+                  {editingCategoryId === category.id ? (
+                    <>
+                      <button
+                        onClick={() => handleUpdateCategory(category.id)}
+                        className={`p-1.5 rounded transition-colors ${
+                          darkMode
+                            ? 'text-green-400 hover:bg-green-900/30'
+                            : 'text-green-600 hover:bg-green-50'
+                        }`}
+                        title="Save"
+                      >
+                        <Save size={16} />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setEditingCategoryId(null)
+                          setEditingCategoryName('')
+                        }}
+                        className={`p-1.5 rounded transition-colors ${
+                          darkMode
+                            ? 'text-gray-400 hover:bg-navy-600'
+                            : 'text-gray-600 hover:bg-gray-200'
+                        }`}
+                        title="Cancel"
+                      >
+                        <X size={16} />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => {
+                          setEditingCategoryId(category.id)
+                          setEditingCategoryName(category.name)
+                        }}
+                        className={`p-1.5 rounded transition-colors ${
+                          darkMode
+                            ? 'text-blue-400 hover:bg-blue-900/30'
+                            : 'text-blue-600 hover:bg-blue-50'
+                        }`}
+                        title="Edit"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button
+                        onClick={() => setDeleteCategoryId(category.id)}
+                        className={`p-1.5 rounded transition-colors ${
+                          darkMode
+                            ? 'text-red-400 hover:bg-red-900/30'
+                            : 'text-red-600 hover:bg-red-50'
+                        }`}
+                        title="Delete"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
 
       {/* Add Form */}
       {showAddForm && (
@@ -417,11 +692,13 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
                       : 'bg-gray-50 border-gray-300 text-black'
                   }`}
                 >
-                  <option>Shopify</option>
-                  <option>Python</option>
-                  <option>WordPress</option>
-                  <option>React</option>
-                  <option>Other</option>
+                  {categories.length > 0 ? (
+                    categories.map((cat) => (
+                      <option key={cat.id} value={cat.name}>{cat.name}</option>
+                    ))
+                  ) : (
+                    <option value="Shopify">Shopify</option>
+                  )}
                 </select>
               </div>
             </div>
@@ -532,7 +809,8 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
                 type="button"
                 onClick={() => {
                   setShowAddForm(false)
-                  setFormData({ name: '', url: '', description: '', tech_stack: '', category: 'Shopify', is_featured: false, images: '', imageFiles: [] })
+                  const defaultCategory = categories.length > 0 ? categories[0].name : 'Shopify'
+                  setFormData({ name: '', url: '', description: '', tech_stack: '', category: defaultCategory, is_featured: false, images: '', imageFiles: [] })
                   setImagePreviews([])
                 }}
                 className={`px-4 py-2 border rounded-lg transition-colors ${
@@ -627,6 +905,23 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
                         : 'bg-gray-50 border-gray-300 text-black'
                     }`}
                   />
+                  <select
+                    value={project.category}
+                    onChange={(e) => setProjects(projects.map((p) => p.id === project.id ? { ...p, category: e.target.value } : p))}
+                    className={`w-full px-3 py-2 border rounded text-sm ${
+                      darkMode
+                        ? 'bg-navy-700 border-navy-600 text-white'
+                        : 'bg-gray-50 border-gray-300 text-black'
+                    }`}
+                  >
+                    {categories.length > 0 ? (
+                      categories.map((cat) => (
+                        <option key={cat.id} value={cat.name}>{cat.name}</option>
+                      ))
+                    ) : (
+                      <option value="Shopify">Shopify</option>
+                    )}
+                  </select>
                   <input
                     type="text"
                     value={project.images}

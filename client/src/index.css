@@ -796,13 +796,14 @@ html:not(.dark) .aurora i { opacity: 0.38; }
 
 .tl { position: relative; padding-left: 36px; }
 .tl::before {
-  content: ''; position: absolute; left: 7px; top: 8px; bottom: 8px; width: 2px;
+  content: ''; position: absolute; left:50%; top: 8px; bottom: 8px; width: 2px;
   background: linear-gradient(to bottom, var(--teal-500), var(--amber-400) 70%, transparent);
   border-radius: 2px; opacity: 0.8;
+  transform: translateX(-50%);
 }
-.tl-item { position: relative; padding-bottom: 28px; }
+.tl-item { padding-bottom: 28px;width: calc(50% - 45px); }
 .tl-node {
-  position: absolute; left: -36px; top: 26px;
+  position: absolute; left: calc(50% - 26px); top: 26px;
   width: 16px; height: 16px; border-radius: 50%;
   background: var(--bg-void);
   border: 2px solid var(--amber-400);
@@ -1400,3 +1401,20 @@ section { position: relative; z-index: 1; padding: 112px 0 80px; }
 /* icon-prefixed inputs: keep Tailwind's padding utilities from being overridden by .admin-input */
 .admin-input.pl-10 { padding-left: 2.5rem; }
 .admin-input.pr-11 { padding-right: 2.75rem; }
+
+
+.experience-group{
+  width: 100% !important;
+  max-width: 100% !important;
+  display: flex;
+  flex-wrap: wrap;
+}
+.experience-item{
+  width:100%;
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+}
+.experience-item:nth-child(even) {
+  justify-content: flex-end;
+}

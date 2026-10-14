@@ -76,7 +76,15 @@ CREATE TABLE IF NOT EXISTS projects (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 6. Education Table
+-- 6. Project Categories Table
+CREATE TABLE IF NOT EXISTS project_categories (
+  id SERIAL PRIMARY KEY,
+  name TEXT UNIQUE NOT NULL,
+  display_order INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 7. Education Table
 CREATE TABLE IF NOT EXISTS education (
   id SERIAL PRIMARY KEY,
   degree TEXT NOT NULL,
@@ -116,6 +124,7 @@ ALTER TABLE profile ENABLE ROW LEVEL SECURITY;
 ALTER TABLE skills ENABLE ROW LEVEL SECURITY;
 ALTER TABLE experience ENABLE ROW LEVEL SECURITY;
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
+ALTER TABLE project_categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE education ENABLE ROW LEVEL SECURITY;
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE site_settings ENABLE ROW LEVEL SECURITY;
@@ -126,6 +135,7 @@ DROP POLICY IF EXISTS "Public Read Profile" ON profile;
 DROP POLICY IF EXISTS "Public Read Skills" ON skills;
 DROP POLICY IF EXISTS "Public Read Experience" ON experience;
 DROP POLICY IF EXISTS "Public Read Projects" ON projects;
+DROP POLICY IF EXISTS "Public Read Project Categories" ON project_categories;
 DROP POLICY IF EXISTS "Public Read Education" ON education;
 DROP POLICY IF EXISTS "Public Read Site Settings" ON site_settings;
 DROP POLICY IF EXISTS "Public Insert Messages" ON messages;
@@ -134,6 +144,7 @@ DROP POLICY IF EXISTS "Public Write Profile" ON profile;
 DROP POLICY IF EXISTS "Public Write Skills" ON skills;
 DROP POLICY IF EXISTS "Public Write Experience" ON experience;
 DROP POLICY IF EXISTS "Public Write Projects" ON projects;
+DROP POLICY IF EXISTS "Public Write Project Categories" ON project_categories;
 DROP POLICY IF EXISTS "Public Write Education" ON education;
 
 -- Public Read Policies
@@ -141,6 +152,7 @@ CREATE POLICY "Public Read Profile" ON profile FOR SELECT USING (true);
 CREATE POLICY "Public Read Skills" ON skills FOR SELECT USING (true);
 CREATE POLICY "Public Read Experience" ON experience FOR SELECT USING (true);
 CREATE POLICY "Public Read Projects" ON projects FOR SELECT USING (true);
+CREATE POLICY "Public Read Project Categories" ON project_categories FOR SELECT USING (true);
 CREATE POLICY "Public Read Education" ON education FOR SELECT USING (true);
 CREATE POLICY "Public Read Site Settings" ON site_settings FOR SELECT USING (true);
 
@@ -149,6 +161,7 @@ CREATE POLICY "Public Write Profile" ON profile FOR ALL USING (true) WITH CHECK 
 CREATE POLICY "Public Write Skills" ON skills FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Public Write Experience" ON experience FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Public Write Projects" ON projects FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public Write Project Categories" ON project_categories FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Public Write Education" ON education FOR ALL USING (true) WITH CHECK (true);
 
 -- Messages Policies (Contact Form)
@@ -266,6 +279,15 @@ VALUES
   ('Last Elf on the Left', 'https://lastelfontheleft.com/', 'Novelty Christmas merchandise store.', '["Shopify", "Liquid"]'::jsonb, 'Shopify', FALSE, 14),
   ('Signal and Power', 'https://www.signalandpower.com/', 'Industrial power cables and assembly supplier.', '["Shopify", "Liquid"]'::jsonb, 'Shopify', FALSE, 15)
 ON CONFLICT DO NOTHING;
+
+-- Project Categories Seed
+INSERT INTO project_categories (name, display_order)
+VALUES
+  ('Shopify', 0),
+  ('WordPress', 1),
+  ('Python', 2),
+  ('React', 3)
+ON CONFLICT (name) DO NOTHING;
 
 -- Education Seed
 INSERT INTO education (degree, institution, location, start_date, end_date, display_order)

@@ -14,6 +14,8 @@ import { getSkills } from '../services/skillService'
 import { getExperiences } from '../services/experienceService'
 import { getProjects } from '../services/projectService'
 import { getEducation } from '../services/educationService'
+import { getCategories } from '../services/categoryService'
+import { ProjectCategory } from '../services/categoryService'
 
 // Typewriter hook
 function useTypewriter(texts: string[], speed = 80, deleteSpeed = 40, pauseTime = 2000) {
@@ -165,6 +167,7 @@ export default function Home({ darkMode = true, setDarkMode }: HomeProps) {
   const [education, setEducation] = useState<Education[]>([])
   const [loading, setLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState('All')
+  const [dbCategories, setDbCategories] = useState<ProjectCategory[]>([])
 
   const taglineRoles = profile?.tagline_roles || ['Shopify Developer', 'Python Django Developer', 'WordPress Developer']
 
@@ -197,16 +200,47 @@ export default function Home({ darkMode = true, setDarkMode }: HomeProps) {
   const visibleProjects = projects
     .filter((p) => !p.is_featured)
     .filter((p) => activeFilter === 'All' || p.category === activeFilter)
+    .sort((a, b) => {
+      // If "All" is selected, sort by category order
+      if (activeFilter === 'All') {
+        const aOrder = dbCategories.findIndex(c => c.name === a.category)
+        const bOrder = dbCategories.findIndex(c => c.name === b.category)
+        // If category not found in dbCategories, put it at the end
+        const finalAOrder = aOrder === -1 ? 999 : aOrder
+        const finalBOrder = bOrder === -1 ? 999 : bOrder
+        return finalAOrder - finalBOrder
+      }
+      // Otherwise, keep original order
+      return 0
+    })
+
+  // Keep stable category order - use database categories, but only show categories with projects
+  const [stableCategories, setStableCategories] = useState<string[]>(['All'])
+
+  useEffect(() => {
+    if (dbCategories.length > 0) {
+      // Get categories that have at least one project
+      const projectCategories = Array.from(new Set(projects.map((p) => p.category).filter(Boolean)))
+      // Filter dbCategories to only include those that have projects, maintaining order
+      const categoriesWithProjects = dbCategories.map(c => c.name).filter(cat => projectCategories.includes(cat))
+      setStableCategories(['All', ...categoriesWithProjects])
+    } else {
+      // Fallback to categories from projects if database is empty
+      const uniqueCategories = Array.from(new Set(projects.map((p) => p.category).filter(Boolean)))
+      setStableCategories(['All', ...uniqueCategories])
+    }
+  }, [dbCategories, projects])
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [profData, skillsData, expData, projData, eduData] = await Promise.allSettled([
+        const [profData, skillsData, expData, projData, eduData, catData] = await Promise.allSettled([
           getProfile(),
           getSkills(),
           getExperiences(),
           getProjects(),
           getEducation(),
+          getCategories(),
         ])
 
         if (profData.status === 'fulfilled' && profData.value) {
@@ -217,6 +251,9 @@ export default function Home({ darkMode = true, setDarkMode }: HomeProps) {
         if (expData.status === 'fulfilled') setExperiences((expData.value || []) as unknown as Experience[])
         if (projData.status === 'fulfilled') setProjects((projData.value || []) as unknown as Project[])
         if (eduData.status === 'fulfilled') setEducation((eduData.value || []) as unknown as Education[])
+        if (catData.status === 'fulfilled') {
+          setDbCategories((catData.value || []) as unknown as ProjectCategory[])
+        }
       } catch (err) {
         console.error('Error loading Supabase portfolio data:', err)
       } finally {
@@ -521,32 +558,34 @@ export default function Home({ darkMode = true, setDarkMode }: HomeProps) {
           </ScrollReveal>
 
           <ScrollReveal stagger animation="up" delay={100}>
-            <div className="tl max-w-4xl">
+            <div className="tl max-w-4xl experience-group">
               {experiences.map((exp) => (
-                <div key={exp.id} className="tl-item">
-                  <span className={`tl-node ${exp.is_current ? 'current' : ''}`} />
-                  <div className="panel panel-hover p-7">
-                    <div className="flex items-start justify-between flex-wrap gap-3 mb-4">
-                      <div>
-                        <div className="commit-date mb-2">
-                          {exp.start_date} {exp.end_date ? `→ ${exp.end_date}` : '→ HEAD'}
+                <div className="experience-item" key={exp.id}>
+                  <div className="tl-item">
+                    <span className={`tl-node ${exp.is_current ? 'current' : ''}`} />
+                    <div className="panel panel-hover p-7">
+                      <div className="flex items-start justify-between flex-wrap gap-3 mb-4">
+                        <div>
+                          <div className="commit-date mb-2">
+                            {exp.start_date} {exp.end_date ? `→ ${exp.end_date}` : '→ HEAD'}
+                          </div>
+                          <h3 className="text-xl md:text-2xl font-semibold" style={{ color: 'var(--ink-100)' }}>{exp.title}</h3>
+                          <p className="mt-1 flex items-center gap-2 flex-wrap" style={{ color: 'var(--teal-400)' }}>
+                            <Briefcase size={15} /> {exp.company}
+                            {exp.location && <span className="commit-meta">· {exp.location}</span>}
+                          </p>
                         </div>
-                        <h3 className="text-xl md:text-2xl font-semibold" style={{ color: 'var(--ink-100)' }}>{exp.title}</h3>
-                        <p className="mt-1 flex items-center gap-2 flex-wrap" style={{ color: 'var(--teal-400)' }}>
-                          <Briefcase size={15} /> {exp.company}
-                          {exp.location && <span className="commit-meta">· {exp.location}</span>}
-                        </p>
+                        {exp.is_current && <span className="filter-pill active px-3 py-1">● current</span>}
                       </div>
-                      {exp.is_current && <span className="filter-pill active px-3 py-1">● current</span>}
+                      <ul className="space-y-2.5">
+                        {(Array.isArray(exp.description) ? exp.description : String(exp.description || '').split('\n').filter(Boolean)).map((desc, i) => (
+                          <li key={i} className="text-sm leading-relaxed flex items-start gap-3" style={{ color: 'var(--ink-300)' }}>
+                            <span className="chip-dot mt-2" />
+                            {desc}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                    <ul className="space-y-2.5">
-                      {(Array.isArray(exp.description) ? exp.description : String(exp.description || '').split('\n').filter(Boolean)).map((desc, i) => (
-                        <li key={i} className="text-sm leading-relaxed flex items-start gap-3" style={{ color: 'var(--ink-300)' }}>
-                          <span className="chip-dot mt-2" />
-                          {desc}
-                        </li>
-                      ))}
-                    </ul>
                   </div>
                 </div>
               ))}
@@ -632,7 +671,7 @@ export default function Home({ darkMode = true, setDarkMode }: HomeProps) {
           })}
 
           <div className="flex flex-wrap gap-2.5 mb-8">
-            {categories.map((cat) => (
+            {stableCategories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveFilter(cat)}
