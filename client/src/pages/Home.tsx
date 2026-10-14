@@ -151,6 +151,7 @@ function ProjectImages({ project, index }: { project: Project; index: number }) 
           </div>
         ))}
       </Slider>
+      {project.category && <span className="skill-tag accent-teal">{project.category}</span>}
       <span className="proj-arrow"><ArrowUpRight size={17} /></span>
     </div>
   )
@@ -369,7 +370,7 @@ export default function Home({ darkMode = true, setDarkMode }: HomeProps) {
                 <span className="terminal-dot red" />
                 <span className="terminal-dot yellow" />
                 <span className="terminal-dot green" />
-                <span className="terminal-path">~/vijay.dev.ts</span>
+                <span className="terminal-path">~/vijay.bhesaniya</span>
               </div>
               <pre>
                 <span className="tok-k">const</span> developer = {'{'}

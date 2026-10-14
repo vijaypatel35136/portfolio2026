@@ -358,7 +358,7 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
               <div>
                 <label className={`block text-sm font-semibold mb-2 ${
                   darkMode ? 'text-gray-300' : 'text-navy-800'
-                }`}>Project URL</label>
+                }`}>Project URL (optional)</label>
                 <input
                   type="url"
                   value={formData.url}
@@ -369,7 +369,6 @@ export default function ProjectsManager({ onUpdate, onToast, darkMode = true }: 
                       ? 'bg-navy-700 border-navy-600 text-white'
                       : 'bg-gray-50 border-gray-300 text-black'
                   }`}
-                  required
                 />
               </div>
             </div>
