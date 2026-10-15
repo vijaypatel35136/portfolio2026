@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { Menu, X, ArrowUpRight } from 'lucide-react'
 import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion'
@@ -15,15 +15,26 @@ const navLinks = [
   { name: 'Skills',     href: '#skills',     id: 'skills' },
   { name: 'Experience', href: '#experience', id: 'experience' },
   { name: 'Projects',   href: '#projects',   id: 'projects' },
+  { name: 'Education',  href: '#education',  id: 'education' },
   { name: 'Contact',    href: '#contact',    id: 'contact' },
 ]
 
 const SECTION_IDS = ['hero', 'about', 'skills', 'experience', 'projects', 'education', 'contact']
 
+/** A section becomes "current" once its top edge passes this line (px from viewport top). */
+const ACTIVE_LINE = 220
+/** Within this many px of the page top, the first section is always active. */
+const TOP_ZONE = 100
+/** How long to ignore scroll-spy after a click, so smooth scrolling doesn't flicker through sections. */
+const CLICK_LOCK_MS = 1000
+
 export default function Navbar({ darkMode, setDarkMode }: NavbarProps) {
   const [scrolled,       setScrolled]       = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [activeSection,  setActiveSection]  = useState('hero')
+  // First link ("Home") is active by default
+  const [activeSection,  setActiveSection]  = useState(SECTION_IDS[0])
+
+  const lockUntilRef = useRef(0)
 
   /* Reading-progress bar */
   const { scrollYProgress } = useScroll()
@@ -34,16 +45,26 @@ export default function Navbar({ darkMode, setDarkMode }: NavbarProps) {
     const handleScroll = () => {
       setScrolled(window.scrollY > 40)
 
-      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 60) {
-        setActiveSection('contact')
+      // Ignore scroll-spy while a click-triggered smooth scroll is running
+      if (Date.now() < lockUntilRef.current) return
+
+      // Top of the page: Home is always active
+      if (window.scrollY < TOP_ZONE) {
+        setActiveSection(SECTION_IDS[0])
         return
       }
 
-      const scrollPosition = window.scrollY + 220
-      let current = 'hero'
+      // Bottom of the page: last section
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 60) {
+        setActiveSection(SECTION_IDS[SECTION_IDS.length - 1])
+        return
+      }
+
+      // getBoundingClientRect is viewport-relative, so nesting/positioned parents don't matter
+      let current = SECTION_IDS[0]
       for (const id of SECTION_IDS) {
         const el = document.getElementById(id)
-        if (el && scrollPosition >= el.offsetTop) current = id
+        if (el && el.getBoundingClientRect().top <= ACTIVE_LINE) current = id
       }
       setActiveSection(current)
     }
@@ -53,10 +74,13 @@ export default function Navbar({ darkMode, setDarkMode }: NavbarProps) {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  /* ── Listen to manual section change events ── */
+  /* ── Listen to manual section change events (e.g. from ScrollDots) ── */
   useEffect(() => {
     const handleSectionChange = (event: CustomEvent) => {
-      if (event.detail) setActiveSection(event.detail)
+      if (event.detail) {
+        lockUntilRef.current = Date.now() + CLICK_LOCK_MS
+        setActiveSection(event.detail)
+      }
     }
     window.addEventListener('sectionChange', handleSectionChange as EventListener)
     return () => window.removeEventListener('sectionChange', handleSectionChange as EventListener)
@@ -66,6 +90,7 @@ export default function Navbar({ darkMode, setDarkMode }: NavbarProps) {
     const targetId = id || href.replace('#', '')
     const element = document.getElementById(targetId)
     if (element) {
+      lockUntilRef.current = Date.now() + CLICK_LOCK_MS
       element.scrollIntoView({ behavior: 'smooth' })
       setActiveSection(targetId)
       window.dispatchEvent(new CustomEvent('sectionChange', { detail: targetId }))
@@ -103,6 +128,7 @@ export default function Navbar({ darkMode, setDarkMode }: NavbarProps) {
                   scrollToSection(link.href, link.id)
                 }}
                 className={`nav-link ${activeSection === link.id ? 'active' : ''}`}
+                aria-current={activeSection === link.id ? 'true' : undefined}
               >
                 {link.name}
               </a>

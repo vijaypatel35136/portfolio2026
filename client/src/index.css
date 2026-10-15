@@ -803,11 +803,12 @@ html:not(.dark) .aurora i { opacity: 0.38; }
 }
 .tl-item { padding-bottom: 28px;width: calc(50% - 45px); }
 .tl-node {
-  position: absolute; left: calc(50% - 26px); top: 26px;
+  position: absolute; left: 50%; top: 26px;
   width: 16px; height: 16px; border-radius: 50%;
   background: var(--bg-void);
   border: 2px solid var(--amber-400);
   box-shadow: 0 0 0 5px var(--bg-void);
+  transform:translateX(-50%);
 }
 .tl-node.current { border-color: var(--teal-400); box-shadow: 0 0 0 5px var(--bg-void), 0 0 18px var(--teal-400); }
 .tl-node.current::after {
@@ -1408,6 +1409,8 @@ section { position: relative; z-index: 1; padding: 112px 0 80px; }
   max-width: 100% !important;
   display: flex;
   flex-wrap: wrap;
+  position:relative;
+  padding-left:0 !important;
 }
 .experience-item{
   width:100%;
