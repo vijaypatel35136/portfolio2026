@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Trash2, Mail, MailOpen, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { getContactMessages, markMessageAsRead } from '../../services/contactService'
+import { getContactMessages, markMessageAsRead, deleteMessage } from '../../services/contactService'
 import ConfirmationModal from './ConfirmationModal'
 
 interface Message {
@@ -61,9 +61,18 @@ export default function MessagesManager({ onUpdate, onToast, darkMode = true }: 
     }
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (deleteId === null) return
-    setDeleteId(null)
+    try {
+      await deleteMessage(deleteId)
+      await fetchMessages()
+      onUpdate()
+      onToast?.('Message deleted successfully', 'success')
+    } catch (err) {
+      onToast?.(err instanceof Error ? err.message : 'Failed to delete message', 'error')
+    } finally {
+      setDeleteId(null)
+    }
   }
 
   const openMessage = (message: Message) => {

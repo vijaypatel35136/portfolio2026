@@ -1,0 +1,2 @@
+# This file tells VS Code to ignore this folder for project linting
+# because it's a Deno Edge Function, not regular Node.js TypeScript
