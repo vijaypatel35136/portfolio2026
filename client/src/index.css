@@ -1005,6 +1005,61 @@ html:not(.dark) .aurora i { opacity: 0.38; }
 .filter-pill.active { background: var(--teal-100); border-color: var(--teal-500); color: var(--teal-500); }
 
 /* ---------------------------------------------------------------------------
+   SKELETON LOADING
+   --------------------------------------------------------------------------- */
+.skeleton-thumb {
+  height: 175px;
+  background: linear-gradient(90deg,
+    var(--bg-panel) 0%,
+    var(--bg-panel-hover) 50%,
+    var(--bg-panel) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  position: relative;
+}
+.skeleton-title {
+  height: 24px;
+  width: 70%;
+  background: linear-gradient(90deg,
+    var(--bg-panel) 0%,
+    var(--bg-panel-hover) 50%,
+    var(--bg-panel) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 4px;
+}
+.skeleton-text {
+  height: 16px;
+  width: 100%;
+  background: linear-gradient(90deg,
+    var(--bg-panel) 0%,
+    var(--bg-panel-hover) 50%,
+    var(--bg-panel) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 4px;
+}
+.skeleton-text-short {
+  height: 16px;
+  width: 50%;
+  background: linear-gradient(90deg,
+    var(--bg-panel) 0%,
+    var(--bg-panel-hover) 50%,
+    var(--bg-panel) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 4px;
+}
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ---------------------------------------------------------------------------
    CONTACT / FORMS
    --------------------------------------------------------------------------- */
 
@@ -1420,4 +1475,24 @@ section { position: relative; z-index: 1; padding: 112px 0 80px; }
 }
 .experience-item:nth-child(even) {
   justify-content: flex-end;
+}
+
+
+@media (max-width: 767px) {
+  .experience-item:nth-child(even) {
+    justify-content: flex-start;
+  }
+  .tl-item{
+    width:100% !important;
+  }
+  .experience-group{
+    padding-left:36px !important;
+  }
+  .tl::before{
+    left:0 !important;
+    top:0 !important;
+  }
+  .tl-node{
+    left:-36px !important;
+  }
 }

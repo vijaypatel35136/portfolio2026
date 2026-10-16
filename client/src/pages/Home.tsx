@@ -106,6 +106,20 @@ interface HomeProps {
   setDarkMode?: (value: boolean) => void
 }
 
+// Helper component for project skeleton loading
+function ProjectSkeleton() {
+  return (
+    <div className="panel proj-card">
+      <div className="skeleton-thumb" />
+      <div className="p-6">
+        <div className="skeleton-title mb-2" />
+        <div className="skeleton-text mb-4" />
+        <div className="skeleton-text-short" />
+      </div>
+    </div>
+  )
+}
+
 // Helper component for project images
 function ProjectImages({ project, index }: { project: Project; index: number }) {
   const images = project.images || (project.image_url ? [project.image_url] : [])
@@ -166,6 +180,7 @@ export default function Home({ darkMode = true, setDarkMode }: HomeProps) {
   const [projects, setProjects] = useState<Project[]>([])
   const [education, setEducation] = useState<Education[]>([])
   const [loading, setLoading] = useState(true)
+  const [projectsLoading, setProjectsLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState('All')
   const [dbCategories, setDbCategories] = useState<ProjectCategory[]>([])
 
@@ -258,6 +273,7 @@ export default function Home({ darkMode = true, setDarkMode }: HomeProps) {
         console.error('Error loading Supabase portfolio data:', err)
       } finally {
         setLoading(false)
+        setProjectsLoading(false)
       }
     }
 
@@ -683,23 +699,31 @@ export default function Home({ darkMode = true, setDarkMode }: HomeProps) {
           </div>
 
           <ScrollReveal stagger animation="up" delay={150}>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {visibleProjects.map((project, index) => (
-                <a
-                  key={project.id}
-                  href={project.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="panel panel-hover proj-card group"
-                >
-                  <ProjectImages project={project} index={index} />
-                  <div className="p-6">
-                    <h3 className="text-lg font-semibold mb-1.5" style={{ color: 'var(--ink-100)' }}>{project.name}</h3>
-                    {/* <p className="mono text-xs break-all mb-4" style={{ color: 'var(--ink-500)' }}>{(project.url || '').replace('https://', '')}</p> */}
-                    <p className="mono text-xs break-all mb-4" style={{ color: 'var(--ink-500)' }}>{project.description}</p>
-                  </div>
-                </a>
-              ))}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {projectsLoading ? (
+                // Show skeletons while loading
+                Array.from({ length: 6 }).map((_, index) => (
+                  <ProjectSkeleton key={index} />
+                ))
+              ) : (
+                // Show actual projects when loaded
+                visibleProjects.map((project, index) => (
+                  <a
+                    key={project.id}
+                    href={project.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="panel panel-hover proj-card group"
+                  >
+                    <ProjectImages project={project} index={index} />
+                    <div className="p-6">
+                      <h3 className="text-lg font-semibold mb-1.5" style={{ color: 'var(--ink-100)' }}>{project.name}</h3>
+                      {/* <p className="mono text-xs break-all mb-4" style={{ color: 'var(--ink-500)' }}>{(project.url || '').replace('https://', '')}</p> */}
+                      <p className="mono text-xs break-all mb-4" style={{ color: 'var(--ink-500)' }}>{project.description}</p>
+                    </div>
+                  </a>
+                ))
+              )}
             </div>
           </ScrollReveal>
         </div>
