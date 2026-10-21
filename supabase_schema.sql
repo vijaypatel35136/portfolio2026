@@ -6,6 +6,18 @@
 -- Run this in Supabase SQL Editor if your database already exists
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS images JSONB DEFAULT '[]'::jsonb;
 
+-- Migration: Enable RLS on resumes table
+-- Run this in Supabase SQL Editor if your database already exists
+ALTER TABLE resumes ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies if re-running
+DROP POLICY IF EXISTS "Public Read Resumes" ON resumes;
+DROP POLICY IF EXISTS "Public Write Resumes" ON resumes;
+
+-- Create policies for resumes table
+CREATE POLICY "Public Read Resumes" ON resumes FOR SELECT USING (true);
+CREATE POLICY "Public Write Resumes" ON resumes FOR ALL USING (true) WITH CHECK (true);
+
 -- ============================================================================
 
 -- 1. Admin Table
@@ -116,6 +128,18 @@ CREATE TABLE IF NOT EXISTS site_settings (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 9. Resumes Table
+CREATE TABLE IF NOT EXISTS resumes (
+  id SERIAL PRIMARY KEY,
+  filename TEXT NOT NULL,
+  original_name TEXT NOT NULL,
+  file_path TEXT NOT NULL,
+  public_url TEXT NOT NULL,
+  file_size INTEGER,
+  is_active BOOLEAN DEFAULT false,
+  uploaded_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ============================================================================
 -- Row Level Security (RLS) & Security Policies
 -- ============================================================================
@@ -129,6 +153,7 @@ ALTER TABLE education ENABLE ROW LEVEL SECURITY;
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE site_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admin ENABLE ROW LEVEL SECURITY;
+ALTER TABLE resumes ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies if re-running
 DROP POLICY IF EXISTS "Public Read Profile" ON profile;
@@ -138,6 +163,7 @@ DROP POLICY IF EXISTS "Public Read Projects" ON projects;
 DROP POLICY IF EXISTS "Public Read Project Categories" ON project_categories;
 DROP POLICY IF EXISTS "Public Read Education" ON education;
 DROP POLICY IF EXISTS "Public Read Site Settings" ON site_settings;
+DROP POLICY IF EXISTS "Public Read Resumes" ON resumes;
 DROP POLICY IF EXISTS "Public Insert Messages" ON messages;
 DROP POLICY IF EXISTS "Public Select Messages" ON messages;
 DROP POLICY IF EXISTS "Public Write Profile" ON profile;
@@ -146,6 +172,7 @@ DROP POLICY IF EXISTS "Public Write Experience" ON experience;
 DROP POLICY IF EXISTS "Public Write Projects" ON projects;
 DROP POLICY IF EXISTS "Public Write Project Categories" ON project_categories;
 DROP POLICY IF EXISTS "Public Write Education" ON education;
+DROP POLICY IF EXISTS "Public Write Resumes" ON resumes;
 
 -- Public Read Policies
 CREATE POLICY "Public Read Profile" ON profile FOR SELECT USING (true);
@@ -155,6 +182,7 @@ CREATE POLICY "Public Read Projects" ON projects FOR SELECT USING (true);
 CREATE POLICY "Public Read Project Categories" ON project_categories FOR SELECT USING (true);
 CREATE POLICY "Public Read Education" ON education FOR SELECT USING (true);
 CREATE POLICY "Public Read Site Settings" ON site_settings FOR SELECT USING (true);
+CREATE POLICY "Public Read Resumes" ON resumes FOR SELECT USING (true);
 
 -- Public Write Policies (Allowing client operations for admin/portfolio)
 CREATE POLICY "Public Write Profile" ON profile FOR ALL USING (true) WITH CHECK (true);
@@ -163,6 +191,7 @@ CREATE POLICY "Public Write Experience" ON experience FOR ALL USING (true) WITH 
 CREATE POLICY "Public Write Projects" ON projects FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Public Write Project Categories" ON project_categories FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Public Write Education" ON education FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public Write Resumes" ON resumes FOR ALL USING (true) WITH CHECK (true);
 
 -- Messages Policies (Contact Form)
 CREATE POLICY "Public Insert Messages" ON messages FOR INSERT WITH CHECK (true);
