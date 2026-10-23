@@ -343,7 +343,7 @@ export default function Home({ darkMode = true, setDarkMode }: HomeProps) {
   return (
     <div className="relative">
       {/* ═════════════ 01 — HERO ═════════════ */}
-      <section id="hero" className="min-h-screen flex items-center !pt-32 !pb-20 relative">
+      <section id="hero" className="min-h-screen flex items-center !pt-32 !pb-20 relative" itemScope itemType="https://schema.org/Person">
         <div className="max-w-7xl mx-auto px-6 w-full grid lg:grid-cols-[1.15fr_0.85fr] gap-14 items-center">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: 'easeOut' }}>
             <div className="status-pill mb-8">
@@ -351,7 +351,7 @@ export default function Home({ darkMode = true, setDarkMode }: HomeProps) {
               <span>{city} · open to new projects</span>
             </div>
 
-            <h1 className="hero-title mb-7">
+            <h1 className="hero-title mb-7" itemProp="name">
               <span style={{ color: 'var(--ink-100)' }}>{firstName}</span>
               {restName && (
                 <>

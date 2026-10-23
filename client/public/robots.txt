@@ -1,0 +1,11 @@
+# robots.txt for Vijay Bhesaniya Portfolio
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://vijaybhesaniya.github.io/portfolio/sitemap.xml
+
+# Disallow admin panel from indexing
+Disallow: /admin
+Disallow: /login
