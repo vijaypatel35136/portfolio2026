@@ -4,7 +4,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://vijaybhesaniya.github.io/portfolio/sitemap.xml
+Sitemap: https://vijaypatel35136.github.io/portfolio2026/sitemap.xml
 
 # Disallow admin panel from indexing
 Disallow: /admin
