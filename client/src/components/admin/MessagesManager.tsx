@@ -63,12 +63,16 @@ export default function MessagesManager({ onUpdate, onToast, darkMode = true }: 
 
   const handleDelete = async () => {
     if (deleteId === null) return
+    console.log('Deleting message with ID:', deleteId)
     try {
       await deleteMessage(deleteId)
+      console.log('Message deleted successfully from database')
       await fetchMessages()
+      console.log('Messages refreshed')
       onUpdate()
       onToast?.('Message deleted successfully', 'success')
     } catch (err) {
+      console.error('Delete error:', err)
       onToast?.(err instanceof Error ? err.message : 'Failed to delete message', 'error')
     } finally {
       setDeleteId(null)

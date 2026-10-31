@@ -10,7 +10,7 @@ dotenv.config({ path: path.join(__dirname, '../../.env') })
 
 // Initialize Supabase client
 const supabaseUrl = process.env.VITE_SUPABASE_URL || ''
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY || ''
+const supabaseKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY || ''
 
 let supabase: any = null
 if (supabaseUrl && supabaseKey) {
@@ -36,21 +36,21 @@ export async function initializeBucket() {
     }
     const { data: buckets } = await supabase.storage.listBuckets()
     const bucketExists = buckets?.some(bucket => bucket.name === BUCKET_NAME)
-    
+
     if (!bucketExists) {
       const { error } = await supabase.storage.createBucket(BUCKET_NAME, {
         public: true,
         fileSizeLimit: 10485760 // 10MB
       })
-      
+
       if (error) {
-        console.error('Failed to create bucket:', error)
+        console.warn('⚠️ Failed to create bucket (this is ok if bucket already exists):', error.message)
       } else {
         console.log('✅ Supabase Storage bucket created:', BUCKET_NAME)
       }
     }
-  } catch (error) {
-    console.error('Error initializing bucket:', error)
+  } catch (error: any) {
+    console.warn('⚠️ Error initializing bucket (this is ok if bucket already exists):', error.message)
   }
 }
 

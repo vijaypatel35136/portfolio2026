@@ -14,7 +14,6 @@ import contactRoutes from './routes/contact.ts'
 import adminRoutes from './routes/admin.ts'
 import uploadRoutes from './routes/upload.ts'
 import resumesRoutes from './routes/resumes.ts'
-import { initDatabase } from './db/database.ts'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -76,15 +75,8 @@ app.get('*', (req, res) => {
   }
 })
 
-// Initialize database and start server
-initDatabase().then(() => {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`)
-  })
-}).catch((error) => {
-  console.error('Failed to initialize database:', error)
-  console.log('Starting server without database initialization...')
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`)
-  })
+// Start server (Supabase is used directly from client for most operations)
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`)
+  console.log(`ℹ️  Using Supabase for database operations`)
 })
